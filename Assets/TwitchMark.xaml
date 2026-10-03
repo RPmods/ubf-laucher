@@ -1,0 +1,12 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DrawingImage x:Key="TwitchMark">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#FFB9A5FF" Geometry="M4,2 H29 V20 L22,27 H16 L11,32 V27 H4 Z" />
+                <GeometryDrawing Brush="#FF482C76" Geometry="M11,8 H14 V17 H11 Z" />
+                <GeometryDrawing Brush="#FF482C76" Geometry="M20,8 H23 V17 H20 Z" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+</ResourceDictionary>

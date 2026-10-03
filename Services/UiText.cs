@@ -1,0 +1,96 @@
+using System.Globalization;
+
+namespace UBFLauncher.Services;
+
+public static class UiText
+{
+    private static readonly Dictionary<string, (string Spanish, string English)> Text = new()
+    {
+        ["welcome"] = ("Bienvenido", "Welcome"),
+        ["username_label"] = ("Nombre de usuario", "Username"),
+        ["continue"] = ("CONTINUAR", "CONTINUE"),
+        ["username_saved"] = ("Tu nombre se guarda en este equipo.", "Your name is saved on this device."),
+        ["game_section"] = ("EL JUEGO", "THE GAME"),
+        ["verify"] = ("VERIFICAR", "VERIFY"),
+        ["folder"] = ("CARPETA", "FOLDER"),
+        ["user"] = ("USUARIO", "PROFILE"),
+        ["launcher_update"] = ("ACTUALIZAR LAUNCHER", "UPDATE LAUNCHER"),
+        ["sound"] = ("Sonido", "Sound"),
+        ["mute"] = ("SILENCIAR", "MUTE"),
+        ["settings"] = ("Configuración", "Settings"),
+        ["preparing"] = ("Preparando UBF...", "Preparing UBF..."),
+        ["checking_game"] = ("Comprobando UBF", "Checking UBF"),
+        ["not_installed"] = ("UBF no está instalado", "UBF is not installed"),
+        ["install_hint"] = ("Instala el juego para continuar.", "Install the game to continue."),
+        ["verification_needed"] = ("Tu instalación necesita verificación", "Your installation needs verification"),
+        ["verify_before_play"] = ("Comprobaremos los archivos antes de iniciar el juego.", "Game files need to be checked before playing."),
+        ["name_invalid"] = ("Escribe un nombre de hasta 24 caracteres.", "Enter a name up to 24 characters long."),
+        ["checking_files"] = ("Comprobando archivos...", "Checking files..."),
+        ["reading_manifest"] = ("Leyendo la versión disponible y verificando la instalación.", "Checking the available version and verifying the installation."),
+        ["update_available"] = ("Hay una actualización disponible", "An update is available"),
+        ["repair_needed"] = ("Archivos dañados o faltantes", "Damaged or missing files"),
+        ["repair_count"] = ("Se repararán solamente {0} archivo(s).", "Only {0} file(s) will be repaired."),
+        ["update_count"] = ("Versión {0} · {1} archivo(s) por actualizar.", "Version {0} · {1} file(s) to update."),
+        ["update_ready"] = ("Versión {0} · lista para aplicar.", "Version {0} · ready to install."),
+        ["ready"] = ("Listo para jugar", "Ready to play"),
+        ["game_version"] = ("UBF · versión {0}", "UBF · version {0}"),
+        ["local_game_unversioned"] = ("Ejecutable local detectado; no hay una versión guardada. Puedes jugar sin manifiesto remoto.", "Local executable detected; no version is saved. You can play without a remote manifest."),
+        ["local_game_version"] = ("Versión guardada localmente: {0}. JUGAR no depende de la verificación remota.", "Locally saved version: {0}. PLAY does not depend on remote verification."),
+        ["local_play_available"] = ("El ejecutable local sigue disponible con JUGAR.", "The local executable remains available with PLAY."),
+        ["updating_game"] = ("Actualizando UBF...", "Updating UBF..."),
+        ["installing_game"] = ("Instalando UBF...", "Installing UBF..."),
+        ["repairing_game"] = ("Reparando instalación...", "Repairing installation..."),
+        ["validating_download"] = ("Los archivos se validan antes de aplicarse.", "Files are validated before being installed."),
+        ["calculating_download"] = ("Calculando archivos...", "Preparing download..."),
+        ["verify_count"] = ("{0} de {1} archivos", "{0} of {1} files"),
+        ["download_progress"] = ("{0}% · {1} descargados · {2} restantes · {3}", "{0}% · {1} downloaded · {2} remaining · {3}"),
+        ["install_verified"] = ("Instalación verificada", "Installation verified"),
+        ["launching"] = ("Iniciando UBF...", "Starting UBF..."),
+        ["game_running"] = ("UBF está en ejecución", "UBF is running"),
+        ["launch_missing"] = ("Selecciona una carpeta para instalarlo.", "Choose a folder to install the game."),
+        ["error_check_install"] = ("No se pudo comprobar la instalación.", "Could not check the installation."),
+        ["error_verify"] = ("No se pudieron comprobar los archivos. Revisa tu conexión e inténtalo nuevamente.", "Could not verify game files. Check your connection and try again."),
+        ["error_install"] = ("No se pudo completar la instalación. Puedes volver a intentarlo.", "Installation failed. You can try again."),
+        ["error_launch"] = ("No se pudo iniciar el juego.", "Could not start the game."),
+        ["retry_check"] = ("Puedes reintentar la comprobación.", "You can retry the check."),
+        ["launcher_downloading"] = ("Descargando actualización del launcher...", "Downloading launcher update..."),
+        ["launcher_version"] = ("Versión {0}", "Version {0}"),
+        ["launcher_update_found"] = ("Hay una actualización del launcher disponible.", "A launcher update is available."),
+        ["launcher_current"] = ("El launcher está actualizado.", "The launcher is up to date."),
+        ["launcher_no_metadata"] = ("No hay información de actualización publicada todavía.", "No launcher update information is published yet."),
+        ["launcher_check_failed"] = ("No se pudo comprobar la actualización del launcher.", "Could not check for launcher updates."),
+        ["error_launcher_update"] = ("No se pudo actualizar el launcher.", "Could not update the launcher."),
+        ["settings_title"] = ("Configuración", "Settings"),
+        ["settings_subtitle"] = ("Preferencias del launcher", "Launcher preferences"),
+        ["about_title"] = ("Información", "About"),
+        ["about_body"] = ("UBF Launcher · Windows · .NET 8", "UBF Launcher · Windows · .NET 8"),
+        ["language"] = ("Idioma", "Language"),
+        ["install_path"] = ("Carpeta de instalación del juego", "Game installation folder"),
+        ["browse"] = ("EXAMINAR", "BROWSE"),
+        ["automatic_updates"] = ("Instalar actualizaciones del launcher automáticamente", "Install launcher updates automatically"),
+        ["automatic_updates_hint"] = ("Si está desactivado, podrás revisar e instalar las actualizaciones manualmente.", "When off, you can check and install updates manually."),
+        ["verify_game"] = ("VERIFICAR ARCHIVOS DEL JUEGO", "VERIFY GAME FILES"),
+        ["check_launcher"] = ("BUSCAR ACTUALIZACIÓN DEL LAUNCHER", "CHECK FOR LAUNCHER UPDATE"),
+        ["save_settings"] = ("GUARDAR", "SAVE"),
+        ["cancel"] = ("CERRAR", "CLOSE"),
+        ["pick_game_folder"] = ("Selecciona la carpeta de instalación de UBF", "Choose the UBF installation folder"),
+        ["error_launcher_check"] = ("No se pudo comprobar la conexión. Inténtalo nuevamente.", "Could not check the connection. Try again."),
+        ["checking_update"] = ("Buscando actualizaciones...", "Checking for updates..."),
+        ["path_required"] = ("Selecciona una carpeta de instalación válida.", "Choose a valid installation folder."),
+        ["action_install"] = ("INSTALAR", "INSTALL"),
+        ["action_verify"] = ("VERIFICAR", "VERIFY"),
+        ["action_repair"] = ("REPARAR", "REPAIR"),
+        ["action_update"] = ("ACTUALIZAR", "UPDATE"),
+        ["action_play"] = ("JUGAR", "PLAY"),
+        ["action_retry"] = ("REINTENTAR", "RETRY"),
+        ["game_release_not_published"] = ("La versión del juego aún no está publicada", "The game release is not published yet"),
+        ["game_release_not_published_details"] = ("Se requiere UBF {0}. El repositorio https://github.com/{1}/{2} todavía no contiene el manifiesto o los archivos del juego.", "UBF {0} is required. Repository https://github.com/{1}/{2} does not contain the manifest or game files yet.")
+    };
+
+    public static string Get(string language, string key, params object?[] arguments)
+    {
+        var pair = Text.TryGetValue(key, out var value) ? value : (Spanish: key, English: key);
+        var template = language.Equals("en", StringComparison.OrdinalIgnoreCase) ? pair.English : pair.Spanish;
+        return arguments.Length == 0 ? template : string.Format(CultureInfo.CurrentCulture, template, arguments);
+    }
+}

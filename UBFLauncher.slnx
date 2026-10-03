@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="UBFLauncher.csproj" />
+  <Project Path="UBFLauncherUpdater\UBFLauncherUpdater.csproj" />
+  <Project Path="tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj" />
+</Solution>

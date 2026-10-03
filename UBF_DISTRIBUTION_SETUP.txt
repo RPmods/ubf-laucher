@@ -1,0 +1,117 @@
+UBF y UBFLauncher: distribución, instalación y releases
+=======================================================
+
+Estado de esta revisión — 2026-10-03
+------------------------------------
+
+- Juego UBF: Unreal Engine 5.8.2, versión configurada 1.0.1-beta.
+- Launcher: versión independiente 1.0.6.
+- Repositorios: juego RPmods/ubf; launcher RPmods/ubf-laucher (nombre existente).
+- El juego se distribuye como ZIP adjunto a su Release; manifest.json se publica separado en la rama predeterminada.
+- Juego y launcher tienen Releases, tags y versiones independientes. En la inspección inicial no había Releases ni tags. No inventar URLs de assets inexistentes.
+
+1. Fuentes del juego y requisitos
+---------------------------------
+
+Conservar UBF.uproject, Config/, Content/, Source/, Build/Windows/Application.ico, mapas, recursos y carpetas __ExternalActors__/__ExternalObjects__. El .gitignore excluye Binaries/, Intermediate/, DerivedDataCache/ y Saved/, pero no las fuentes. Usar Git LFS para videos grandes. Se necesita Unreal Engine 5.8 y toolchain Windows compatible.
+
+No distribuir Binaries/Win64/UBF.exe: no contiene cook ni datos requeridos. La distribución se crea con Unreal Automation Tool, Windows x64, Shipping, build, cook y stage. Mantener DX12/SM6 y Presentation staged.
+
+2. Compilar y probar UBF Shipping
+---------------------------------
+
+Ejemplo PowerShell. Ajusta rutas. Cada opción separada conserva rutas con espacios:
+
+```powershell
+$Project = 'C:\ruta\al\UBF\UBF.uproject'
+$Archive = 'D:\Builds\UBF-v1.0.1-beta-Win64-Shipping'
+$UAT = 'C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat'
+& $UAT 'BuildCookRun' "-project=$Project" '-noP4' '-platform=Win64' '-clientconfig=Shipping' '-target=UBF' '-build' '-cook' '-stage' '-pak' '-archive' "-archivedirectory=$Archive" '-prereqs' '-unattended' '-utf8output'
+if ($LASTEXITCODE -ne 0) { throw "UAT terminó con código $LASTEXITCODE" }
+```
+
+Usa como raíz del paquete la carpeta que contiene UBF.exe (normalmente Windows/). Conserva Engine/, UBF/, Paks/IoStore y medios staged. Antes de publicar, confirma UAT con código 0/BUILD SUCCESSFUL, archivos cocinados, y ejecuta el build fuera del editor. Repite el arranque desde una extracción limpia del ZIP.
+
+Verificación de esta revisión: Unreal 5.8.2 completó Win64/Shipping Build, Cook, Stage y Archive con código 0; cocinó 587 paquetes. El ejecutable archivado y el extraído del ZIP permanecieron activos en pruebas breves fuera del editor. El ZIP local midió 662748493 bytes; SHA-256 0eec83c888b05d405414e5fdefff204c96e76d8228bc3fcee88c4e7a57cbdae9. Si se modifica, recalcular.
+
+3. Crear ZIP y Release del juego
+--------------------------------
+
+New-GamePackage.ps1 crea un ZIP sin carpeta envolvente y verifica UBF.exe en su raíz. Guárdalo fuera de la build; rechaza paquetes de 2 GiB o más.
+
+```powershell
+.\New-GamePackage.ps1 -BuildDirectory 'D:\Builds\UBF-v1.0.1-beta-Win64-Shipping\Windows' -Version '1.0.1-beta' -OutputDirectory 'D:\Builds\ReleaseStaging'
+```
+
+Secuencia para cada versión:
+1. Sube fuentes de UBF a RPmods/ubf.
+2. Crea Release con tag propio, por ejemplo v1.0.1-beta.
+3. Adjunta UBF-v1.0.1-beta.zip y espera a que termine la carga.
+4. Copia y prueba la URL HTTPS directa del asset, por ejemplo https://github.com/RPmods/ubf/releases/download/v1.0.1-beta/UBF-v1.0.1-beta.zip. No usar la página de la Release.
+5. Genera manifest.json solo cuando el ZIP exista:
+
+```powershell
+.\New-GameManifest.ps1 -GameDirectory 'D:\Builds\UBF-v1.0.1-beta-Win64-Shipping\Windows' -Version '1.0.1-beta' -PackageFile 'D:\Builds\ReleaseStaging\UBF-v1.0.1-beta.zip' -PackageDownloadUrl 'https://github.com/RPmods/ubf/releases/download/v1.0.1-beta/UBF-v1.0.1-beta.zip'
+```
+
+El script valida repo/host/filename y calcula package.fileName/downloadUrl/size/sha256 más files (ruta relativa, tamaño y SHA-256 de cada archivo extraído, incluido UBF.exe). manifest.json queda fuera del ZIP.
+6. Publica manifest.json en raíz de la rama predeterminada RPmods/ubf; el launcher consulta ese JSON raw.
+7. Prueba JSON y asset sin credenciales, instala en una carpeta limpia y prueba VERIFY y reparación de archivo modificado.
+
+No generar el manifiesto final antes de tener URL real. Si cambia la versión del juego, actualiza TargetGameVersion; no incrementes por eso el launcher.
+
+4. Comportamiento de UBFLauncher
+--------------------------------
+
+launcher.settings.json configura repositorios y juego objetivo (1.0.1-beta). SHA-256 está activo.
+
+- Si UBF.exe existe localmente, JUGAR lo ejecuta aunque GitHub no responda o el manifiesto devuelva 404.
+- Sin EXE local, muestra INSTALAR; error remoto no marca el juego como instalado.
+- VERIFY contrasta files (existencia/tamaño/hash), no descarga ZIP.
+- INSTALL/UPDATE/REPAIR obtiene manifiesto fresco, descarga y valida ZIP, extrae a staging aislado, rechaza rutas inseguras, enlaces, duplicados y archivos no declarados, y valida hashes antes de reemplazar.
+- Conserva saves/archivos extra; respalda cambios y hace rollback ante error. Nunca ejecuta paquete parcial.
+
+5. Cambiar, versionar y probar el launcher
+------------------------------------------
+
+Cada cambio funcional requiere incrementar versión y generar artefacto nuevo. Esta revisión deja launcher en 1.0.6 y juego en 1.0.1-beta. Cambia versión en UBFLauncher.csproj, app.manifest y metadatos/textos de versión configurados. No cambiar TargetGameVersion si el juego no cambió.
+
+1. Edita fuentes y conserva assets originales. El CTA Twitch usa Assets/TwitchMark.xaml y https://www.twitch.tv/rodrigorpmods.
+2. Incrementa AssemblyVersion/FileVersion/ProductVersion o InformationalVersion según el proyecto.
+3. Compila y prueba:
+
+```powershell
+dotnet build .\UBFLauncher.csproj -c Release
+dotnet test .\tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj -c Release
+```
+
+4. Ejecuta .\publish.ps1. Regenera launcher/updater self-contained y publish/UBFLauncher-update.zip. Limpia solo salidas generadas bajo publish/. Comprueba exit codes, versión PE, assets, ZIP y SHA-256. No usar EXE generado antes del cambio.
+5. Prueba el launcher publicado, JUGAR local y estados INSTALL/VERIFY sin manifiesto; prueba update/repair con metadata de prueba antes del Release.
+
+6. Release independiente del launcher
+-------------------------------------
+
+Después de compilar y probar:
+1. Sube fuentes a RPmods/ubf-laucher.
+2. Crea tag/Release independiente, por ejemplo launcher-v1.0.6.
+3. Adjunta publish/UBFLauncher-update.zip recién generado.
+4. Verifica launcher, updater, ajustes y assets. Calcula el SHA-256 del ZIP.
+5. Solo con la URL HTTPS directa real del asset actualiza version.json en la rama predeterminada:
+
+```json
+{
+  "version": "1.0.6",
+  "downloadUrl": "URL_HTTPS_DIRECTA_REAL_DEL_ASSET",
+  "sha256": "SHA256_REAL_DEL_ZIP",
+  "releaseNotes": "Resumen de cambios"
+}
+```
+
+No publicar version.json.example con datos vacíos como metadata activa. Verifica descarga/hash sin credenciales y detección de versión.
+
+7. Limpieza y separación
+------------------------
+
+Los ZIP de juego pertenecen a Releases de RPmods/ubf; launcher, a RPmods/ubf-laucher. Launcher nuevo no justifica quitar versiones del juego. Antes de limpiar una Release obsoleta del launcher, verifica la nueva, conserva commits/tags/fuentes y elimina solo artefactos obsoletos del launcher. No borrar tags ni historial. Si no hay artifacts viejos o faltan permisos, documentarlo. publish.ps1 solo limpia outputs locales, no GitHub.
+
+Conservar PNG/logo/iconos originales; el juego usa Build/Windows/Application.ico y el launcher Assets/logo.ico. Videos grandes usan Git LFS. No versionar credenciales/tokens.

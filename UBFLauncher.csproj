@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+    <Version>1.0.6</Version>
+    <AssemblyName>UBFLauncher</AssemblyName>
+    <RootNamespace>UBFLauncher</RootNamespace>
+    <PublishSingleFile>false</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="UBFLauncherUpdater\**\*.cs;tests\**\*.cs" />
+    <Content Include="Assets\**\*" CopyToOutputDirectory="PreserveNewest" Exclude="Assets\logo.ico;Assets\**\*.xaml" />
+    <Resource Include="Assets\logo.ico" />
+    <Content Include="launcher.settings.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('launcher.settings.json')" />
+  </ItemGroup>
+</Project>

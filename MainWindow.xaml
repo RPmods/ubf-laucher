@@ -1,0 +1,116 @@
+<Window x:Class="UBFLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="UBF Launcher" Width="1280" Height="720" MinWidth="1280" MinHeight="720" MaxWidth="1280" MaxHeight="720"
+        Icon="pack://application:,,,/UBFLauncher;component/Assets/logo.ico"
+        WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" BorderBrush="#FF080B0D" Background="#FF080B0D" Opacity="0"
+        WindowStartupLocation="CenterScreen" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        Loaded="Window_Loaded" Closing="Window_Closing">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/UBFLauncher;component/Assets/TwitchMark.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid ClipToBounds="True">
+        <Grid x:Name="FallbackBackground" Background="#FF11191A" />
+        <MediaElement x:Name="BackgroundVideo" LoadedBehavior="Manual" UnloadedBehavior="Stop"
+                      Stretch="UniformToFill" ClipToBounds="True" MediaEnded="BackgroundVideo_MediaEnded"
+                      MediaFailed="BackgroundVideo_MediaFailed" IsHitTestVisible="False" />
+        <Grid x:Name="BackgroundOverlay" IsHitTestVisible="False">
+            <Rectangle Fill="#A9080B0D" />
+            <Rectangle>
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#D9080B0D" Offset="0" />
+                        <GradientStop Color="#60080B0D" Offset="0.52" />
+                        <GradientStop Color="#A9080B0D" Offset="1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+        </Grid>
+
+        <Grid x:Name="WindowChrome" Height="48" VerticalAlignment="Top" MouseLeftButtonDown="Chrome_MouseLeftButtonDown" Panel.ZIndex="5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,18,0">
+                <Button x:Name="SettingsButton" Content="⚙" Width="38" Height="32" ToolTip="Configuración" Style="{StaticResource QuietButton}" Padding="0" Click="Settings_Click" />
+                <Button Content="—" Width="38" Height="32" Style="{StaticResource QuietButton}" Padding="0" Click="Minimize_Click" />
+                <Button Content="×" Width="38" Height="32" Margin="7,0,0,0" Style="{StaticResource QuietButton}" Padding="0" Click="Close_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Margin="42,72,42,84">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border x:Name="UserPanel" Grid.Column="0" Background="#D9101418" BorderBrush="#80F34255" BorderThickness="1"
+                    CornerRadius="5" Padding="30" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                <Border.RenderTransform><TranslateTransform x:Name="UserTransform" X="-65" /></Border.RenderTransform>
+                <StackPanel>
+                    <TextBlock Text="UBF" Foreground="{StaticResource AccentBrush}" FontSize="16" FontWeight="Bold" />
+                    <TextBlock x:Name="WelcomeTitle" Text="Bienvenido" Foreground="White" FontSize="30" FontWeight="SemiBold" Margin="0,22,0,8" />
+                    <TextBlock x:Name="UsernameLabel" Text="Nombre de usuario" Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,0,0,10" />
+                    <TextBox x:Name="UserNameInput" Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}"
+                             Height="46" Padding="12,10" FontSize="16" Foreground="White" CaretBrush="White"
+                             Background="#55232B31" BorderBrush="#557C8A8A" BorderThickness="1"
+                             KeyDown="UserNameInput_KeyDown" />
+                    <TextBlock x:Name="NameError" Foreground="#FFFF8B82" FontSize="12" Margin="0,8,0,0" />
+                    <Button x:Name="ContinueButton" Content="CONTINUAR" Style="{StaticResource PrimaryButton}" Margin="0,22,0,0" HorizontalAlignment="Stretch" Click="Continue_Click" />
+                    <TextBlock x:Name="UsernameHint" Text="Tu nombre se guarda en este equipo." Foreground="#FF89949A" FontSize="11" Margin="0,16,0,0" />
+                </StackPanel>
+            </Border>
+
+            <Grid x:Name="GamePanel" Grid.Column="1" Margin="10,0,0,0" Opacity="0" Visibility="Collapsed" RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform><TranslateTransform x:Name="GameTransform" X="34" /></Grid.RenderTransform>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Width="460">
+                    <Image x:Name="GameLogo" Source="" MaxHeight="165" MaxWidth="470" Stretch="Uniform"
+                           HorizontalAlignment="Right" Visibility="Collapsed" />
+                    <TextBlock x:Name="Wordmark" Text="UBF" Foreground="White" FontSize="86" FontWeight="Black" TextAlignment="Right" />
+                    <Border Width="66" Height="3" Background="{StaticResource AccentBrush}" HorizontalAlignment="Right" Margin="0,8,0,22" />
+                    <TextBlock x:Name="GameSectionLabel" Text="EL JUEGO" Foreground="#FFFF7581" FontSize="12" FontWeight="SemiBold" TextAlignment="Right" />
+                    <TextBlock Text="{Binding Status}" Foreground="White" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Right" Margin="0,8,0,0" />
+                    <TextBlock Text="{Binding Details}" Foreground="#FFE4C5C9" FontSize="14" TextWrapping="Wrap" TextAlignment="Right" Margin="0,8,0,0" />
+                    <ProgressBar Height="3" Margin="0,20,0,8" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"
+                                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 Foreground="{StaticResource AccentBrush}" Background="#664B252C" />
+                    <TextBlock Text="{Binding CurrentFile}" Foreground="#FFE4C5C9" FontSize="12" TextTrimming="CharacterEllipsis" TextAlignment="Right"
+                               Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Text="{Binding ProgressText}" Foreground="#FFE4C5C9" FontSize="12" Margin="0,4,0,0" TextAlignment="Right"
+                               Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <Button x:Name="PrimaryButton" Content="{Binding PrimaryAction}" IsEnabled="{Binding CanUsePrimaryAction}" Style="{StaticResource PrimaryButton}"
+                            Width="245" Height="58" HorizontalAlignment="Right" Margin="0,28,0,0" Click="Primary_Click" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                        <Button x:Name="VerifyButton" Content="VERIFICAR" Style="{StaticResource QuietButton}" Click="Verify_Click" />
+                        <Button x:Name="FolderButton" Content="CARPETA" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="ChangeFolder_Click" />
+                        <Button x:Name="ChangeUserButton" Content="USUARIO" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="ChangeUser_Click" />
+                    </StackPanel>
+                    <Button x:Name="LauncherUpdateButton" Content="ACTUALIZAR LAUNCHER" Style="{StaticResource QuietButton}"
+                            HorizontalAlignment="Right" Margin="0,12,0,0" Visibility="Collapsed" Click="LauncherUpdate_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <DockPanel VerticalAlignment="Bottom" Margin="34,0,34,22" LastChildFill="False" Panel.ZIndex="4">
+            <StackPanel x:Name="SocialButtons" Orientation="Horizontal" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center">
+                <ToggleButton x:Name="VolumePopupToggle" Content="♫" Width="38" Height="38" ToolTip="Sonido" Foreground="White"
+                              Background="#38232B31" BorderThickness="0" Checked="VolumeToggle_Checked" Unchecked="VolumeToggle_Unchecked" />
+                <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=VolumePopupToggle}" Placement="Top"
+                       AllowsTransparency="True" StaysOpen="False" IsOpen="{Binding IsChecked, ElementName=VolumePopupToggle}">
+                    <Border Background="#EF10171A" BorderBrush="#557C8A8A" BorderThickness="1" CornerRadius="4" Padding="14" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="MuteButton" Content="MUTE" Style="{StaticResource QuietButton}" Padding="9,7" Click="Mute_Click" />
+                            <Slider x:Name="VolumeSlider" Width="140" Minimum="0" Maximum="1" Value="0.65" Margin="12,0,0,0"
+                                    VerticalAlignment="Center" ValueChanged="VolumeSlider_ValueChanged" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+                <TextBlock Text="{Binding UserName}" Foreground="#FFB1BCBB" VerticalAlignment="Center" Margin="12,0,0,0" />
+            </StackPanel>
+        </DockPanel>
+
+        <TextBlock x:Name="LauncherBadge" Text="UBF  /  LAUNCHER  ·  V1.0.6" Foreground="#CCFFFFFF" FontSize="10"
+                   VerticalAlignment="Top" HorizontalAlignment="Left" Margin="28,18,0,0" IsHitTestVisible="False" />
+    </Grid>
+</Window>

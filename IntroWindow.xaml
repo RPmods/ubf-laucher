@@ -1,0 +1,11 @@
+<Window x:Class="UBFLauncher.IntroWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="UBF" Width="640" Height="360" ResizeMode="NoResize" AllowsTransparency="True"
+        Icon="pack://application:,,,/UBFLauncher;component/Assets/logo.ico"
+        WindowStyle="None" WindowStartupLocation="CenterScreen" ShowInTaskbar="False"
+        Topmost="True" Background="Transparent" Opacity="0" Loaded="Window_Loaded">
+    <Grid Background="Transparent">
+        <Image x:Name="IntroLogo" Stretch="Uniform" Margin="24" Opacity="0" />
+    </Grid>
+</Window>

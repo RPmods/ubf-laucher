@@ -1,0 +1,27 @@
+{
+  "Settings": {
+    "GameRepository": "RPmods/ubf",
+    "LauncherRepository": "RPmods/ubf-laucher",
+    "GameManifestPath": "manifest.json",
+    "LauncherVersionPath": "version.json",
+    "TargetGameVersion": "1.0.1-beta",
+    "GameExecutableName": "UBF.EXE",
+    "BackgroundVideoPath": "Assets/background.mp4",
+    "MusicPath": "Assets/menu_sd_laucher_badays.mp3",
+    "AlternateMusicPath": "Assets/menu_sd_laucher_goodays.mp3",
+    "LogoPath": "Assets/logo.png",
+    "FileVerification": {
+      "VerifySha256": true,
+      "HashBufferSizeKb": 128
+    },
+    "SocialLinks": {
+      "Discord": "https://discord.gg/RsJAK8gxq",
+      "YouTube": "https://www.youtube.com/@rodrigorpmodsyt",
+      "Twitch": "https://www.twitch.tv/rodrigorpmods",
+      "TikTok": "https://www.tiktok.com/@rodrigorpmods",
+      "Web": ""
+    }
+  },
+  "GameManifestUrl": "",
+  "LauncherVersionUrl": ""
+}
