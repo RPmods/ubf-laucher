@@ -5,14 +5,14 @@ Estado de esta revisión — 2026-10-03
 ------------------------------------
 
 - Juego UBF: Unreal Engine 5.8.2, versión 1.0.2-beta.
-- Launcher: WPF/.NET 8, versión independiente 1.0.7.
+- Launcher: WPF/.NET 8, versión independiente 1.0.8.
 - Repositorios separados: RPmods/ubf y RPmods/ubf-laucher.
 - Releases, tags, paquetes ZIP y metadata de actualización nunca se comparten entre productos.
 
 | Producto | Repositorio | Tag de Release | Archivo de distribución |
 |---|---|---|---|
 | Juego UBF | RPmods/ubf | `v1.0.2-beta` | `UBF-v1.0.2-beta.zip` |
-| UBFLauncher | RPmods/ubf-laucher | `launcher-v1.0.7` | `UBFLauncher-update.zip` |
+| UBFLauncher | RPmods/ubf-laucher | `launcher-v1.0.8` | `UBFLauncher-update.zip` |
 
 1. Contenido y arranque de UBF
 -----------------------------
@@ -29,7 +29,7 @@ Los recursos de presentación son:
 
 `musicintro.mp3` se reproduce una vez. Al terminar, el callback de MediaPlayer inicia `musicintrobucle.mp3` en bucle. El video de fondo también se repite. El audio anterior `introdution_ubf.mp3` ya no forma parte del flujo.
 
-En Shipping, `UBFGameInstance` exige la cadena de procesos de UBFLauncher y la variable de sesión `UBF_LAUNCHER_USERNAME`, que el launcher establece al iniciar `UBF.exe`. Una apertura directa de `UBF.exe` termina antes de dejar accesible el menú. El launcher pausa su propia música mientras el juego está abierto y la reanuda cuando UBF se cierra. La interfaz actual de UBF solo presenta la intro y el menú beta; el botón `JUGAR` del juego conserva el mensaje de error beta.
+En Shipping, `UBFGameInstance` exige la cadena de procesos de UBFLauncher y la variable de sesión `UBF_LAUNCHER_USERNAME`. El launcher inicia directamente `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, no el bootstrap `UBF.exe`: así permanece asociado al proceso real y la validación reconoce el launcher como padre. La apertura directa de `UBF.exe` o del binario Shipping no deja accesible el menú. El launcher pausa su propia música hasta que UBF se cierra. La interfaz actual de UBF solo presenta la intro y el menú beta; el botón `JUGAR` del juego conserva el mensaje de error beta.
 
 Conservar `UBF.uproject`, `Config/`, `Source/`, `Build/Windows/Application.ico` y los recursos de presentación. Los assets y fuentes retirados siguen en el historial Git. No subir `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/` ni archivos de trabajo del editor. Los videos grandes usan Git LFS.
 
@@ -73,13 +73,15 @@ El script lee la lista de archivos del ZIP y genera hashes solo para esos archiv
 - Al iniciar UBF, el reproductor del launcher pausa aunque el medio todavía esté abriéndose. Al cerrarse el juego, la música se reanuda.
 - El control de audio muestra un icono de altavoz, estado silenciado, deslizador y tooltip bilingüe.
 - Los botones sociales usan iconos vectoriales para Discord, YouTube, Twitch, TikTok y Web; los fondos llevan degradados y Twitch apunta a `twitch.tv/rodrigorpmods`.
-- Si UBF.exe existe localmente, JUGAR no depende de GitHub. VERIFY contrasta los hashes sin descargar el ZIP.
+- VERIFY solo lee el manifiesto y contrasta hashes; nunca descarga el ZIP. Si todo coincide, guarda la versión y deja el juego listo. Si hay diferencias, presenta `ACTUALIZAR` o `REPARAR`; el paquete se descarga solo cuando se confirma esa acción.
+- La raíz de instalación debe contener `UBF.exe`, `Engine/` y `UBF/`. No selecciones la carpeta `Binaries/Win64` del proyecto fuente: el launcher la detecta y evita verificar o descargar sobre ella.
+- JUGAR inicia el binario Shipping real `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`. Durante el arranque, el botón dice `INICIANDO...` y JUGAR/VERIFICAR se deshabilitan para evitar clics repetidos. El launcher sigue la ventana del juego hasta que se cierre.
 - INSTALL/UPDATE/REPAIR valida y extrae el ZIP en staging, rechaza rutas inseguras y archivos no declarados, conserva saves y revierte el reemplazo ante fallos.
 
 5. Actualizar, compilar y probar UBFLauncher
 --------------------------------------------
 
-Cada cambio funcional requiere incrementar la versión del launcher en `UBFLauncher.csproj` y `app.manifest`. Revisa también los fallbacks de versión y `version.json.example`. Cambia `TargetGameVersion` únicamente cuando se publique una nueva versión del juego.
+Cada cambio funcional requiere incrementar la versión del launcher en `UBFLauncher.csproj` y `app.manifest`. Revisa también los fallbacks de versión y `version.json.example`. Cambia `TargetGameVersion` únicamente cuando se publique una nueva versión del juego. Esta revisión publica UBFLauncher 1.0.8 y deja UBF en 1.0.2-beta.
 
 ```powershell
 dotnet build .\UBFLauncher.slnx -c Release
@@ -102,8 +104,8 @@ Después de probar el build actual:
 
 ```json
 {
-  "version": "1.0.7",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.7/UBFLauncher-update.zip",
+  "version": "1.0.8",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.8/UBFLauncher-update.zip",
   "sha256": "SHA256_REAL_DEL_ZIP",
   "releaseNotes": "Resumen de cambios"
 }
@@ -122,14 +124,15 @@ Cuando el launcher nuevo esté publicado y verificado, elimina solo Releases/art
 ----------------------------
 
 - UBF v1.0.2-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.2-beta
-- UBFLauncher v1.0.7: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.7
+- UBFLauncher v1.0.8: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.8
 - Conserva UBF v1.0.1-beta; es una versión anterior del juego y no depende de la versión del launcher.
 - UBF 1.0.2-beta: ZIP de 465028352 bytes; SHA-256 `253b5eb3a78a2d3042e0b5136e3801c1109b261ca9e06419e11ec1915f56fb85`.
-- UBFLauncher 1.0.7: ZIP de 350125294 bytes; SHA-256 `f0adff975d889ab6b76eae3476e4f8894a36f37f8ad4e2b21c9d1e2d62426ff9`; ProductVersion referencia el commit `83ca000`.
+- UBFLauncher 1.0.8: ZIP de 350126292 bytes; SHA-256 `b422ca271b5095cfafdcf9c45a997735adeaf3610a5664d8c60b3d5d252d1461`; ProductVersion referencia el commit `0f6916c`.
 - UBF 1.0.2-beta completó Unreal 5.8.2 Win64/Shipping Build, Cook, Stage y Archive con código 0. Cocinó 490 paquetes. La prueba de arranque desde launcher mantuvo la ventana activa durante la comprobación; el inicio directo se cerró antes de dejar el menú accesible.
-- El launcher 1.0.7 compiló con 0 advertencias y 0 errores; sus 18 pruebas pasaron. Los dos assets nuevos de iconos vectoriales se compilan como recursos WPF BAML.
+- El launcher 1.0.8 compiló con 0 advertencias y 0 errores; sus 20 pruebas pasaron. Incluyen verificaciones repetidas sin descarga, rechazo de `Binaries/Win64` y estado anti spam del botón al iniciar.
+- La prueba del binario Shipping real abrió la ventana `UBF` y el proceso permaneció activo durante la comprobación.
 - Las dos URLs directas de los assets devolvieron HTTP 200 y tamaños iguales a los archivos locales.
-- La Release obsoleta del launcher v1.0.6 se retiró después de verificar la nueva v1.0.7; su tag `launcher-v1.0.6`, commits y fuentes se conservan. La Release UBF v1.0.1-beta sigue publicada.
+- Las Releases obsoletas del launcher v1.0.6 y v1.0.7 se retiraron después de verificar la nueva v1.0.8; se conservan ambos tags, commits y fuentes. La Release UBF v1.0.1-beta sigue publicada.
 
 No guardes credenciales/tokens en los repositorios. Conserva PNG, logos, iconos, fuentes, tags y commits necesarios para reproducir el historial.
 

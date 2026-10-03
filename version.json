@@ -1,6 +1,6 @@
 {
-  "version": "1.0.7",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.7/UBFLauncher-update.zip",
-  "sha256": "f0adff975d889ab6b76eae3476e4f8894a36f37f8ad4e2b21c9d1e2d62426ff9",
-  "releaseNotes": "Pauses launcher music while UBF runs, adds sound and social icons with gradient links, and targets UBF 1.0.2-beta."
+  "version": "1.0.8",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.8/UBFLauncher-update.zip",
+  "sha256": "b422ca271b5095cfafdcf9c45a997735adeaf3610a5664d8c60b3d5d252d1461",
+  "releaseNotes": "VERIFY no longer downloads the game ZIP. JUGAR launches the Shipping executable, shows INICIANDO... and blocks repeat clicks. Rejects the Unreal source Binaries/Win64 folder as an install path."
 }
