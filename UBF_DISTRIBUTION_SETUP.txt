@@ -115,3 +115,11 @@ No publicar version.json.example con datos vacíos como metadata activa. Verific
 Los ZIP de juego pertenecen a Releases de RPmods/ubf; launcher, a RPmods/ubf-laucher. Launcher nuevo no justifica quitar versiones del juego. Antes de limpiar una Release obsoleta del launcher, verifica la nueva, conserva commits/tags/fuentes y elimina solo artefactos obsoletos del launcher. No borrar tags ni historial. Si no hay artifacts viejos o faltan permisos, documentarlo. publish.ps1 solo limpia outputs locales, no GitHub.
 
 Conservar PNG/logo/iconos originales; el juego usa Build/Windows/Application.ico y el launcher Assets/logo.ico. Videos grandes usan Git LFS. No versionar credenciales/tokens.
+
+Estado publicado — 2026-10-03
+-----------------------------
+
+- Juego v1.0.1-beta: Release https://github.com/RPmods/ubf/releases/tag/v1.0.1-beta; asset UBF-v1.0.1-beta.zip, 662748493 bytes, SHA-256 0eec83c888b05d405414e5fdefff204c96e76d8228bc3fcee88c4e7a57cbdae9. manifest.json está publicado en la raíz de main.
+- Launcher v1.0.6: Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.6; asset UBFLauncher-update.zip, 350108721 bytes, SHA-256 c663402b6bf1d1f3d7559bef25ed0ad8a1872fabcabc0df0feda8af62d69f0fc. version.json está publicado en main.
+- Ambos assets recibieron HTTP 200 en comprobación anónima; la API reportó los tamaños y hashes esperados.
+- No existían Releases/tag/artefactos antiguos al comenzar, así que no se eliminó ninguna Release ni tag. Se conservaron los commits previos de ambos repositorios.

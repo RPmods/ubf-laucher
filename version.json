@@ -1,0 +1,6 @@
+{
+  "version": "1.0.6",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.6/UBFLauncher-update.zip",
+  "sha256": "c663402b6bf1d1f3d7559bef25ed0ad8a1872fabcabc0df0feda8af62d69f0fc",
+  "releaseNotes": "ZIP game install, secure staging and rollback, local play independent of GitHub, plus Twitch UI link."
+}

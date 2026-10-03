@@ -28,3 +28,9 @@ publish.ps1 crea las salidas self-contained bajo publish/. No modifica Releases 
 - Launcher: https://github.com/RPmods/ubf-laucher
 
 Usa Git LFS para videos grandes. No subir outputs generados ni credenciales.
+
+## Releases publicadas
+
+- Juego UBF v1.0.1-beta: [Release](https://github.com/RPmods/ubf/releases/tag/v1.0.1-beta), ZIP 662748493 bytes.
+- UBFLauncher v1.0.6: [Release](https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.6), ZIP 350108721 bytes.
+- El manifiesto del juego y version.json del launcher están publicados en sus respectivas ramas main.
