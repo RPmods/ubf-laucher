@@ -24,6 +24,8 @@ public static class UiText
         ["checking_game"] = ("Comprobando UBF", "Checking UBF"),
         ["not_installed"] = ("UBF no está instalado", "UBF is not installed"),
         ["install_hint"] = ("Instala el juego para continuar.", "Install the game to continue."),
+        ["invalid_install_directory"] = ("La carpeta elegida es la salida de compilación de Unreal", "The selected folder is an Unreal build output"),
+        ["install_package_root"] = ("Selecciona la raíz del paquete instalado de UBF. No uses la carpeta Binaries\\Win64 del proyecto fuente.", "Choose the root of the installed UBF package. Do not use the source project's Binaries\\Win64 folder."),
         ["verification_needed"] = ("Tu instalación necesita verificación", "Your installation needs verification"),
         ["verify_before_play"] = ("Comprobaremos los archivos antes de iniciar el juego.", "Game files need to be checked before playing."),
         ["name_invalid"] = ("Escribe un nombre de hasta 24 caracteres.", "Enter a name up to 24 characters long."),
@@ -86,6 +88,7 @@ public static class UiText
         ["action_repair"] = ("REPARAR", "REPAIR"),
         ["action_update"] = ("ACTUALIZAR", "UPDATE"),
         ["action_play"] = ("JUGAR", "PLAY"),
+        ["action_launching"] = ("INICIANDO...", "STARTING..."),
         ["action_retry"] = ("REINTENTAR", "RETRY"),
         ["game_release_not_published"] = ("La versión del juego aún no está publicada", "The game release is not published yet"),
         ["game_release_not_published_details"] = ("Se requiere UBF {0}. El repositorio https://github.com/{1}/{2} todavía no contiene el manifiesto o los archivos del juego.", "UBF {0} is required. Repository https://github.com/{1}/{2} does not contain the manifest or game files yet.")

@@ -44,17 +44,30 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? UpdateHandoffRequested;
-    public LauncherState State { get => _state; private set { _state = value; OnPropertyChanged(); OnPropertyChanged(nameof(PrimaryAction)); OnPropertyChanged(nameof(IsReady)); } }
+    public LauncherState State
+    {
+        get => _state;
+        private set
+        {
+            _state = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PrimaryAction));
+            OnPropertyChanged(nameof(IsReady));
+            OnPropertyChanged(nameof(CanUsePrimaryAction));
+            OnPropertyChanged(nameof(CanVerify));
+        }
+    }
     public string Status { get => _status; private set { _status = value; OnPropertyChanged(); } }
     public string Details { get => _details; private set { _details = value; OnPropertyChanged(); } }
     public string UserName { get => _userName; set { _userName = value; OnPropertyChanged(); } }
     public string CurrentFile { get => _currentFile; private set { _currentFile = value; OnPropertyChanged(); } }
     public double Progress { get => _progress; private set { _progress = value; OnPropertyChanged(); } }
     public string ProgressText { get => _progressText; private set { _progressText = value; OnPropertyChanged(); } }
-    public bool IsBusy { get => _busy; private set { _busy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanUsePrimaryAction)); } }
+    public bool IsBusy { get => _busy; private set { _busy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanUsePrimaryAction)); OnPropertyChanged(nameof(CanVerify)); } }
     public bool LauncherUpdateAvailable { get => _launcherUpdateAvailable; private set { _launcherUpdateAvailable = value; OnPropertyChanged(); } }
     public bool IsReady => State == LauncherState.ReadyToPlay;
-    public bool CanUsePrimaryAction => !IsBusy;
+    public bool CanUsePrimaryAction => !IsBusy && State != LauncherState.Launching;
+    public bool CanVerify => !IsBusy && State != LauncherState.Launching;
     public bool HasUserName => !string.IsNullOrWhiteSpace(_config.UserName);
     public string PrimaryAction => State switch
     {
@@ -63,6 +76,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         LauncherState.Repairing => UiText.Get(_language, "action_repair"),
         LauncherState.Updating => UiText.Get(_language, "action_update"),
         LauncherState.ReadyToPlay => UiText.Get(_language, "action_play"),
+        LauncherState.Launching => UiText.Get(_language, "action_launching"),
         LauncherState.Error => UiText.Get(_language, "action_retry"),
         _ => "..."
     };
@@ -100,7 +114,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
             State = LauncherState.CheckingGame;
             Status = UiText.Get(_language, "checking_game");
             Details = "";
-            if (!File.Exists(Path.Combine(_config.InstallDirectory, _config.GameExecutableName)))
+            if (IsUnrealProjectOutputDirectory(_config.InstallDirectory))
+            {
+                State = LauncherState.NotInstalled;
+                Status = UiText.Get(_language, "invalid_install_directory");
+                Details = UiText.Get(_language, "install_package_root");
+                return;
+            }
+            if (!HasLocalGameExecutable)
             {
                 State = LauncherState.NotInstalled;
                 Status = UiText.Get(_language, "not_installed");
@@ -108,10 +129,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 return;
             }
             State = LauncherState.ReadyToPlay;
-        {
             Status = UiText.Get(_language, "ready");
             Details = "";
-        }
             Details = GetLocalGameDetails();
         }
         catch (Exception ex) { HandleError(UiText.Get(_language, "error_check_install"), ex); }
@@ -156,10 +175,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 _config.InstalledGameVersion = _manifest.Version;
                 ConfigurationService.Save(_config, _logger);
                 State = LauncherState.ReadyToPlay;
-            {
-            Status = UiText.Get(_language, "ready");
-            Details = "";
-        }
+                Status = UiText.Get(_language, "ready");
+                Details = "";
                 Details = UiText.Get(_language, "game_version", _manifest.Version);
             }
         }
@@ -174,8 +191,21 @@ public sealed class MainViewModel : INotifyPropertyChanged
         if (State == LauncherState.NotInstalled)
         {
             if (string.IsNullOrWhiteSpace(selectedDirectory)) return;
+            if (IsUnrealProjectOutputDirectory(selectedDirectory))
+            {
+                Status = UiText.Get(_language, "invalid_install_directory");
+                Details = UiText.Get(_language, "install_package_root");
+                return;
+            }
             _config.InstallDirectory = selectedDirectory;
             ConfigurationService.Save(_config, _logger);
+        }
+        else if (IsUnrealProjectOutputDirectory(_config.InstallDirectory))
+        {
+            State = LauncherState.NotInstalled;
+            Status = UiText.Get(_language, "invalid_install_directory");
+            Details = UiText.Get(_language, "install_package_root");
+            return;
         }
         IsBusy = true;
         try
@@ -204,10 +234,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
             ConfigurationService.Save(_config, _logger);
             _logger.Info($"Game operation completed; changed {count} files");
             State = LauncherState.ReadyToPlay;
-        {
             Status = UiText.Get(_language, "ready");
             Details = "";
-        }
             Details = UiText.Get(_language, "game_version", _manifest.Version);
             Progress = 100;
             ProgressText = UiText.Get(_language, "install_verified");
@@ -222,8 +250,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
         if (State != LauncherState.ReadyToPlay || IsBusy) return null;
         try
         {
-            var executable = Path.GetFullPath(Path.Combine(_config.InstallDirectory, _config.GameExecutableName));
-            if (!File.Exists(executable))
+            var bootstrapExecutable = Path.GetFullPath(Path.Combine(_config.InstallDirectory, _config.GameExecutableName));
+            var executable = GetShippingExecutablePath();
+            if (!File.Exists(bootstrapExecutable) || !File.Exists(executable))
             {
                 State = LauncherState.NotInstalled;
                 Status = UiText.Get(_language, "not_installed");
@@ -247,8 +276,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 HandleError(UiText.Get(_language, "error_launch"), new InvalidOperationException("Process.Start returned false."));
                 return null;
             }
-            State = LauncherState.ReadyToPlay;
-            Status = UiText.Get(_language, "game_running");
             return gameProcess;
         }
         catch (Exception ex)
@@ -265,9 +292,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
             ? "The process is still running. Check the game log before trying again."
             : "El proceso sigue activo. Revisa el log del juego antes de volver a intentarlo.";
     }
+
+    public void NotifyGameWindowStarted()
+    {
+        if (State != LauncherState.Launching) return;
+        Status = UiText.Get(_language, "game_running");
+        Details = "";
+    }
+
     public void NotifyGameProcessExited()
     {
-        if (State == LauncherState.ReadyToPlay || State == LauncherState.Launching)
+        if (State == LauncherState.Launching)
+            State = HasLocalGameExecutable ? LauncherState.ReadyToPlay : LauncherState.NotInstalled;
+
+        if (State == LauncherState.ReadyToPlay)
         {
             Status = UiText.Get(_language, "ready");
             Details = "";
@@ -276,6 +314,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public void NotifyGameStartupFailed()
     {
+        if (State == LauncherState.Launching)
+            State = HasLocalGameExecutable ? LauncherState.ReadyToPlay : LauncherState.NotInstalled;
         Status = UiText.Get(_language, "game_start_failed");
         Details = UiText.Get(_language, "game_start_failed_details");
     }
@@ -287,7 +327,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             var remote = await _distribution.GetLauncherVersionAsync(timeout.Token);
             if (remote is null) return "launcher_no_metadata";
-            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.7";
+            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.8";
             LauncherUpdateAvailable = VersionUtility.IsNewer(remote.Version, current);
             if (LauncherUpdateAvailable) _logger.Info($"Launcher update available: {remote.Version}");
             OnPropertyChanged(nameof(PrimaryAction));
@@ -310,7 +350,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         try
         {
             var remote = await _distribution.GetLauncherVersionAsync() ?? throw new InvalidDataException("No launcher release metadata is available.");
-            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.7")) { LauncherUpdateAvailable = false; return; }
+            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.8")) { LauncherUpdateAvailable = false; return; }
             var installedUpdater = Path.Combine(AppContext.BaseDirectory, "UBFLauncherUpdater.exe");
             if (!File.Exists(installedUpdater)) throw new FileNotFoundException("The launcher updater is not installed beside the launcher.", installedUpdater);
             updateTemp = Path.Combine(Path.GetTempPath(), "UBFLauncherUpdate", Guid.NewGuid().ToString("N"));
@@ -409,7 +449,25 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     private bool HasLocalGameExecutable =>
-        File.Exists(Path.Combine(_config.InstallDirectory, _config.GameExecutableName));
+        File.Exists(Path.Combine(_config.InstallDirectory, _config.GameExecutableName)) &&
+        File.Exists(GetShippingExecutablePath());
+
+    private static bool IsUnrealProjectOutputDirectory(string path)
+    {
+        try
+        {
+            var directory = new DirectoryInfo(Path.GetFullPath(path));
+            var projectDirectory = directory.Parent?.Parent;
+            return directory.Name.Equals("Win64", StringComparison.OrdinalIgnoreCase) &&
+                directory.Parent?.Name.Equals("Binaries", StringComparison.OrdinalIgnoreCase) == true &&
+                projectDirectory is not null &&
+                File.Exists(Path.Combine(projectDirectory.FullName, "UBF.uproject"));
+        }
+        catch { return false; }
+    }
+
+    private string GetShippingExecutablePath() => Path.GetFullPath(Path.Combine(
+        _config.InstallDirectory, "UBF", "Binaries", "Win64", "UBF-Win64-Shipping.exe"));
 
     private string GetLocalGameDetails() => string.IsNullOrWhiteSpace(_config.InstalledGameVersion)
         ? UiText.Get(_language, "local_game_unversioned")

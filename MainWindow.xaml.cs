@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     private bool _showingUserPanel;
     private Process? _gameProcess;
     private bool _gameWindowHidden;
+    private bool _launchInProgress;
 
     public MainWindow(MainViewModel viewModel, AudioService audio, LauncherConfig config, Logger logger)
     {
@@ -167,7 +168,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.7";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.8";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
@@ -218,6 +219,7 @@ public partial class MainWindow : Window
 
     private async void Primary_Click(object sender, RoutedEventArgs e)
     {
+        if (_launchInProgress || _viewModel.State == LauncherState.Launching) return;
         switch (_viewModel.State)
         {
             case LauncherState.NotInstalled:
@@ -248,6 +250,7 @@ public partial class MainWindow : Window
 
     private async void Verify_Click(object sender, RoutedEventArgs e)
     {
+        if (_launchInProgress || _viewModel.IsBusy) return;
         if (_viewModel.State == LauncherState.NotInstalled)
         {
             await Primary_ClickAsync();
@@ -322,6 +325,7 @@ public partial class MainWindow : Window
     private void BackgroundVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e) { _logger.Error("Background video playback failed", e.ErrorException); BackgroundVideo.Visibility = Visibility.Collapsed; }
     private async Task StartGameProcessAsync()
     {
+        if (_launchInProgress) return;
         if (_gameProcess is not null)
         {
             try { if (!_gameProcess.HasExited) return; }
@@ -329,11 +333,13 @@ public partial class MainWindow : Window
             RestoreAfterGame(_gameProcess);
         }
 
+        _launchInProgress = true;
         _audio.Pause();
         UpdateAudioControls();
         var process = _viewModel.LaunchGame();
         if (process is null)
         {
+            _launchInProgress = false;
             _audio.Resume();
             UpdateAudioControls();
             return;
@@ -364,23 +370,29 @@ public partial class MainWindow : Window
             {
                 _logger.Error("UBF stayed running but did not create a main window within 30 seconds.");
                 _viewModel.NotifyGameWindowUnavailable();
-                _audio.Resume();
-                UpdateAudioControls();
                 return;
             }
 
             ShowInTaskbar = false;
             Hide();
             _gameWindowHidden = true;
+            _viewModel.NotifyGameWindowStarted();
             if (!SetForegroundWindow(gameWindow))
                 _logger.Info("Windows did not allow UBF to take foreground focus after startup.");
         }
         catch (Exception ex)
         {
             _logger.Error("Could not wait for the UBF window", ex);
-            _audio.Resume();
-            UpdateAudioControls();
-            _viewModel.NotifyGameWindowUnavailable();
+            try
+            {
+                if (!process.HasExited)
+                {
+                    _viewModel.NotifyGameWindowUnavailable();
+                    return;
+                }
+            }
+            catch (InvalidOperationException) { }
+            RestoreAfterGame(process);
         }
     }
     private void GameProcess_Exited(object? sender, EventArgs e)
@@ -398,6 +410,7 @@ public partial class MainWindow : Window
         }
 
         _gameProcess = null;
+        _launchInProgress = false;
         process.Exited -= GameProcess_Exited;
         try
         {

@@ -83,7 +83,7 @@
                     <Button x:Name="PrimaryButton" Content="{Binding PrimaryAction}" IsEnabled="{Binding CanUsePrimaryAction}" Style="{StaticResource PrimaryButton}"
                             Width="245" Height="58" HorizontalAlignment="Right" Margin="0,28,0,0" Click="Primary_Click" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
-                        <Button x:Name="VerifyButton" Content="VERIFICAR" Style="{StaticResource QuietButton}" Click="Verify_Click" />
+                        <Button x:Name="VerifyButton" Content="VERIFICAR" IsEnabled="{Binding CanVerify}" Style="{StaticResource QuietButton}" Click="Verify_Click" />
                         <Button x:Name="FolderButton" Content="CARPETA" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="ChangeFolder_Click" />
                         <Button x:Name="ChangeUserButton" Content="USUARIO" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="ChangeUser_Click" />
                     </StackPanel>
@@ -136,7 +136,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="UBF  /  LAUNCHER" Foreground="White" FontSize="11" FontWeight="Bold" />
-                    <TextBlock x:Name="LauncherBadge" Text="GAME DISTRIBUTION  ·  V1.0.7" Foreground="#FFD4C6E5" FontSize="9" Margin="0,3,0,0" />
+                    <TextBlock x:Name="LauncherBadge" Text="GAME DISTRIBUTION  ·  V1.0.8" Foreground="#FFD4C6E5" FontSize="9" Margin="0,3,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>

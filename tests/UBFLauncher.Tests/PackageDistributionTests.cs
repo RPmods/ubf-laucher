@@ -101,6 +101,67 @@ public sealed class PackageDistributionTests
     }
 
     [Fact]
+    public async Task RepeatedVerificationNeverDownloadsTheGamePackage()
+    {
+        using var temp = new TemporaryDirectory();
+        var root = Path.Combine(temp.Path, "game");
+        Directory.CreateDirectory(root);
+        var executable = new byte[] { 41, 42, 43 };
+        await File.WriteAllBytesAsync(Path.Combine(root, "UBF.exe"), executable);
+        var files = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase) { ["UBF.exe"] = executable };
+        var archive = CreateZip(files);
+        var manifest = CreateManifest(archive, files);
+        var remote = new FakeDistributionService(manifest);
+        var logger = new Logger(Path.Combine(temp.Path, "verify-repeat.log"));
+
+        await RunOnStaAsync(() =>
+        {
+            var config = new LauncherConfig { InstallDirectory = root, InstalledGameVersion = manifest.Version };
+            using var audio = new AudioService(config, logger);
+            var verifier = new GameVerifier(logger);
+            var viewModel = new MainViewModel(config, remote, verifier, new GameInstaller(remote, verifier, logger), audio, logger);
+
+            viewModel.VerifyGameAsync().GetAwaiter().GetResult();
+            viewModel.VerifyGameAsync().GetAwaiter().GetResult();
+
+            Assert.Equal(2, remote.ManifestRequests);
+            Assert.Equal(0, remote.PackageRequests);
+            Assert.Equal(LauncherState.ReadyToPlay, viewModel.State);
+            return true;
+        });
+    }
+
+    [Fact]
+    public async Task UnrealProjectBinariesFolderIsRejectedAsGameInstallDirectory()
+    {
+        using var temp = new TemporaryDirectory();
+        var project = Path.Combine(temp.Path, "UBF");
+        var output = Path.Combine(project, "Binaries", "Win64");
+        Directory.CreateDirectory(output);
+        await File.WriteAllTextAsync(Path.Combine(project, "UBF.uproject"), "{}");
+        await File.WriteAllTextAsync(Path.Combine(output, "UBF.exe"), "development build");
+        var logger = new Logger(Path.Combine(temp.Path, "invalid-path.log"));
+        var remote = new FakeDistributionService();
+
+        await RunOnStaAsync(() =>
+        {
+            var config = new LauncherConfig { InstallDirectory = output };
+            using var audio = new AudioService(config, logger);
+            var verifier = new GameVerifier(logger);
+            var viewModel = new MainViewModel(config, remote, verifier, new GameInstaller(remote, verifier, logger), audio, logger);
+
+            viewModel.CheckGamePresenceAsync().GetAwaiter().GetResult();
+            Assert.Equal(LauncherState.NotInstalled, viewModel.State);
+            Assert.Equal("INSTALAR", viewModel.PrimaryAction);
+            viewModel.InstallOrUpdateGameAsync(output).GetAwaiter().GetResult();
+            Assert.Equal(output, config.InstallDirectory);
+            Assert.Equal(0, remote.ManifestRequests);
+            Assert.Equal(0, remote.PackageRequests);
+            return true;
+        });
+    }
+
+    [Fact]
     public async Task CorruptZipHashFailsBeforeChangingInstalledFiles()
     {
         using var temp = new TemporaryDirectory();
@@ -222,6 +283,9 @@ public sealed class PackageDistributionTests
         Directory.CreateDirectory(root);
         var executable = Path.Combine(root, "UBF.exe");
         File.Copy(Path.Combine(Environment.SystemDirectory, "whoami.exe"), executable);
+        var shippingDirectory = Path.Combine(root, "UBF", "Binaries", "Win64");
+        Directory.CreateDirectory(shippingDirectory);
+        File.Copy(Path.Combine(Environment.SystemDirectory, "whoami.exe"), Path.Combine(shippingDirectory, "UBF-Win64-Shipping.exe"));
         var remote = new FakeDistributionService(new ReleaseNotPublishedException("manifest 404"));
         var logger = new Logger(Path.Combine(temp.Path, "launcher.log"));
 
@@ -244,6 +308,10 @@ public sealed class PackageDistributionTests
 
             using var game = viewModel.LaunchGame();
             Assert.NotNull(game);
+            Assert.Equal(LauncherState.Launching, viewModel.State);
+            Assert.Equal("INICIANDO...", viewModel.PrimaryAction);
+            Assert.False(viewModel.CanUsePrimaryAction);
+            Assert.False(viewModel.CanVerify);
             Assert.True(game!.WaitForExit(10_000));
             viewModel.NotifyGameProcessExited();
             Assert.Equal(LauncherState.ReadyToPlay, viewModel.State);
@@ -348,19 +416,23 @@ public sealed class PackageDistributionTests
     {
         private readonly byte[]? _packageBytes;
         private readonly Exception? _manifestError;
+        private readonly GameManifest? _gameManifest;
         public int ManifestRequests { get; private set; }
         public int PackageRequests { get; private set; }
 
         public FakeDistributionService() { }
         public FakeDistributionService(byte[] packageBytes) => _packageBytes = packageBytes;
         public FakeDistributionService(Exception manifestError) => _manifestError = manifestError;
+        public FakeDistributionService(GameManifest manifest) => _gameManifest = manifest;
 
         public Task<GameManifest> GetGameManifestAsync(CancellationToken cancellationToken = default)
         {
             ManifestRequests++;
             return _manifestError is not null
                 ? Task.FromException<GameManifest>(_manifestError)
-                : Task.FromException<GameManifest>(new InvalidOperationException("A test manifest was not configured."));
+                : _gameManifest is not null
+                    ? Task.FromResult(_gameManifest)
+                    : Task.FromException<GameManifest>(new InvalidOperationException("A test manifest was not configured."));
         }
 
         public Task<LauncherVersion?> GetLauncherVersionAsync(CancellationToken cancellationToken = default) => Task.FromResult<LauncherVersion?>(null);
