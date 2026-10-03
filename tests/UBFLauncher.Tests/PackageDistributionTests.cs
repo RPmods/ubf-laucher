@@ -107,7 +107,7 @@ public sealed class PackageDistributionTests
         var root = Path.Combine(temp.Path, "game");
         Directory.CreateDirectory(root);
         var executable = new byte[] { 41, 42, 43 };
-        await File.WriteAllBytesAsync(Path.Combine(root, "UBF.exe"), executable);
+        await File.WriteAllBytesAsync(Path.Combine(root, "UBF.exe"), [0]);
         var files = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase) { ["UBF.exe"] = executable };
         var archive = CreateZip(files);
         var manifest = CreateManifest(archive, files);
@@ -126,7 +126,8 @@ public sealed class PackageDistributionTests
 
             Assert.Equal(2, remote.ManifestRequests);
             Assert.Equal(0, remote.PackageRequests);
-            Assert.Equal(LauncherState.ReadyToPlay, viewModel.State);
+            Assert.Equal(LauncherState.Repairing, viewModel.State);
+            Assert.Equal("REPARAR", viewModel.PrimaryAction);
             return true;
         });
     }
