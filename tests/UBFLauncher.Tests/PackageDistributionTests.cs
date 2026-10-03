@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Windows;
+using System.Collections;
+using System.Resources;
 using UBFLauncher.Models;
 using UBFLauncher.Services;
 using Xunit;
@@ -189,19 +190,28 @@ public sealed class PackageDistributionTests
     }
 
     [Fact]
-    public async Task TwitchVectorAssetLoadsFromLauncherResources()
+    public void TwitchVectorAssetLoadsFromLauncherResources()
     {
-        var loaded = await RunOnStaAsync(() =>
-        {
-            _ = new Application();
-            var resources = new ResourceDictionary
-            {
-                Source = new Uri("pack://application:,,,/UBFLauncher;component/Assets/TwitchMark.xaml", UriKind.Absolute)
-            };
-            return resources["TwitchMark"] is System.Windows.Media.ImageSource;
-        });
+        Assert.Contains("assets/twitchmark.baml", LoadCompiledResourceKeys());
+    }
 
-        Assert.True(loaded);
+    [Fact]
+    public void SocialAndAudioVectorAssetsLoadFromLauncherResources()
+    {
+        var keys = LoadCompiledResourceKeys();
+        Assert.Contains("assets/socialmarks.baml", keys);
+        Assert.Contains("assets/audiomarks.baml", keys);
+    }
+
+    private static HashSet<string> LoadCompiledResourceKeys()
+    {
+        using var stream = typeof(App).Assembly.GetManifestResourceStream("UBFLauncher.g.resources")
+            ?? throw new InvalidDataException("Compiled WPF resources are missing.");
+        using var reader = new ResourceReader(stream);
+        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var entries = reader.GetEnumerator();
+        while (entries.MoveNext()) keys.Add((string)entries.Key);
+        return keys;
     }
 
     [Fact]

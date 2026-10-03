@@ -8,6 +8,14 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+function Test-SafeGameRelativePath([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path) -or $Path.StartsWith('/') -or $Path.Contains(':')) { return $false }
+    foreach ($part in $Path.Split('/')) {
+        if ([string]::IsNullOrWhiteSpace($part) -or $part -in @('.', '..') -or $part.EndsWith('.') -or $part.EndsWith(' ')) { return $false }
+        if ($part -match '^(?i:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)') { return $false }
+    }
+    return $true
+}
 $root = (Resolve-Path -LiteralPath $GameDirectory).Path
 if (-not (Test-Path -LiteralPath (Join-Path $root 'UBF.EXE') -PathType Leaf)) {
     throw 'The game directory must contain UBF.EXE at its root.'
@@ -35,17 +43,33 @@ if (-not [Uri]::TryCreate($PackageDownloadUrl, [UriKind]::Absolute, [ref]$downlo
     throw "PackageDownloadUrl must be the real direct HTTPS GitHub Release asset URL for $ReleaseRepository and this ZIP filename."
 }
 
-$files = Get-ChildItem -LiteralPath $root -File -Recurse | ForEach-Object {
-    if (($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
-        throw "The packaged game contains a symbolic link/reparse point that cannot be included safely: $($_.FullName)"
-    }
-    $relative = [IO.Path]::GetRelativePath($root, $_.FullName).Replace('\', '/')
-    [ordered]@{
-        path = $relative
-        size = $_.Length
-        sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+$zip = [IO.Compression.ZipFile]::OpenRead($packagePath)
+try {
+    $files = foreach ($entry in $zip.Entries | Where-Object { -not [string]::IsNullOrEmpty($_.Name) }) {
+        $relative = $entry.FullName.Replace('\', '/')
+        if (-not (Test-SafeGameRelativePath $relative)) {
+            throw "The package contains an unsafe path: $relative"
+        }
+        $sourcePath = [IO.Path]::GetFullPath((Join-Path $root ($relative.Replace('/', [IO.Path]::DirectorySeparatorChar))))
+        if (-not $sourcePath.StartsWith($root.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase) -or
+            -not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+            throw "A package entry is missing from the build directory: $relative"
+        }
+        $sourceFile = Get-Item -LiteralPath $sourcePath
+        if (($sourceFile.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "The packaged game contains a symbolic link/reparse point that cannot be included safely: $($sourceFile.FullName)"
+        }
+        if ($sourceFile.Length -ne $entry.Length) {
+            throw "Package/build size mismatch for $relative."
+        }
+        [ordered]@{
+            path = $relative
+            size = $entry.Length
+            sha256 = (Get-FileHash -LiteralPath $sourcePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        }
     }
 }
+finally { $zip.Dispose() }
 
 if (-not $files) { throw 'No game files were found.' }
 if (-not ($files | Where-Object { $_.path -ieq 'UBF.exe' })) { throw 'The game file list must include UBF.exe at its root.' }

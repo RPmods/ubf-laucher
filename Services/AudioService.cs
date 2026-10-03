@@ -21,6 +21,7 @@ public sealed class AudioService : IDisposable
     private int _failedOpenAttempts;
     private bool _opened;
     private bool _started;
+    private bool _paused;
 
     public AudioService(LauncherConfig config, Logger logger)
     {
@@ -43,8 +44,15 @@ public sealed class AudioService : IDisposable
                 : FallbackTrackEnd;
             _fadeStart = _trackEnd > FadeDuration ? _trackEnd - FadeDuration : TimeSpan.Zero;
             ApplyCurrentVolume();
-            _player.Play();
-            _timer.Start();
+            if (!_paused)
+            {
+                _player.Play();
+                _timer.Start();
+            }
+            else
+            {
+                _player.Pause();
+            }
             _logger.Info($"Playing menu music: {Path.GetFileName(_tracks[_trackIndex])}");
         };
         _player.MediaEnded += (_, _) => { if (_opened) OpenNextTrack(); };
@@ -59,6 +67,7 @@ public sealed class AudioService : IDisposable
 
     public double Volume => _volume;
     public bool IsMuted { get; private set; }
+    public bool IsPaused => _paused;
     public event EventHandler? VolumeChanged;
 
     public void Start()
@@ -72,6 +81,27 @@ public sealed class AudioService : IDisposable
         OpenNextTrack();
     }
 
+    public void Pause()
+    {
+        if (_paused) return;
+        _paused = true;
+        _timer.Stop();
+        if (_opened) _player.Pause();
+        VolumeChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void Resume()
+    {
+        if (!_paused) return;
+        _paused = false;
+        if (_opened)
+        {
+            ApplyCurrentVolume();
+            _player.Play();
+            _timer.Start();
+        }
+        VolumeChanged?.Invoke(this, EventArgs.Empty);
+    }
     public void SetVolume(double value)
     {
         _volume = Math.Clamp(value, 0, 1);

@@ -23,12 +23,17 @@ New-Item -ItemType Directory -Path $output -Force | Out-Null
 $archive = Join-Path $output "UBF-v$Version.zip"
 if (Test-Path -LiteralPath $archive) { Remove-Item -LiteralPath $archive -Force }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-[IO.Compression.ZipFile]::CreateFromDirectory(
-    $root,
-    $archive,
-    [IO.Compression.CompressionLevel]::Optimal,
-    $false
-)
+$zip = [IO.Compression.ZipFile]::Open($archive, [IO.Compression.ZipArchiveMode]::Create)
+try {
+    foreach ($file in Get-ChildItem -LiteralPath $root -File -Recurse) {
+        if ($file.Extension -ieq '.pdb') { continue }
+        $entryName = [IO.Path]::GetRelativePath($root, $file.FullName).Replace('\', '/')
+        [IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+            $zip, $file.FullName, $entryName, [IO.Compression.CompressionLevel]::Optimal
+        ) | Out-Null
+    }
+}
+finally { $zip.Dispose() }
 
 $archiveInfo = Get-Item -LiteralPath $archive
 if ($archiveInfo.Length -ge 2GB) {
@@ -38,6 +43,9 @@ $zip = [IO.Compression.ZipFile]::OpenRead($archive)
 try {
     if (-not ($zip.Entries | Where-Object { $_.FullName -ieq 'UBF.exe' })) {
         throw 'The ZIP does not contain UBF.exe at its root; it cannot be installed by UBFLauncher.'
+    }
+    if ($zip.Entries | Where-Object { $_.FullName -match '\.pdb$' }) {
+        throw 'Debug symbol files (.pdb) are not part of the game distribution ZIP.'
     }
 }
 finally { $zip.Dispose() }

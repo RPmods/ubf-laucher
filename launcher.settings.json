@@ -4,7 +4,7 @@
     "LauncherRepository": "RPmods/ubf-laucher",
     "GameManifestPath": "manifest.json",
     "LauncherVersionPath": "version.json",
-    "TargetGameVersion": "1.0.1-beta",
+    "TargetGameVersion": "1.0.2-beta",
     "GameExecutableName": "UBF.EXE",
     "BackgroundVideoPath": "Assets/background.mp4",
     "MusicPath": "Assets/menu_sd_laucher_badays.mp3",

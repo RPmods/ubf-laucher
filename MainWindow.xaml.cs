@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,6 +12,10 @@ namespace UBFLauncher;
 
 public partial class MainWindow : Window
 {
+    [DllImport("user32.dll")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
     private readonly MainViewModel _viewModel;
     private readonly AudioService _audio;
     private readonly LauncherConfig _config;
@@ -27,6 +32,7 @@ public partial class MainWindow : Window
         _audio = audio;
         _config = config;
         _logger = logger;
+        _audio.VolumeChanged += Audio_VolumeChanged;
         DataContext = viewModel;
         _viewModel.UpdateHandoffRequested += (_, _) => Application.Current.Shutdown();
         _viewModel.PropertyChanged += (_, args) =>
@@ -41,6 +47,7 @@ public partial class MainWindow : Window
         _audio.Start();
         VolumeSlider.Value = _audio.Volume;
         _controlsReady = true;
+        UpdateAudioControls();
         ApplyLanguage();
         LoadBackgroundVideo();
         LoadLogo();
@@ -75,7 +82,9 @@ public partial class MainWindow : Window
         {
             var path = ResolveAsset(_config.LogoPath);
             if (!File.Exists(path)) return;
-            GameLogo.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(path));
+            var logo = new System.Windows.Media.Imaging.BitmapImage(new Uri(path));
+            GameLogo.Source = logo;
+            LauncherBrandIcon.Source = logo;
             GameLogo.Visibility = Visibility.Visible;
             Wordmark.Visibility = Visibility.Collapsed;
         }
@@ -90,47 +99,58 @@ public partial class MainWindow : Window
             var validUrl = Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps;
             var button = new Button
             {
-                Content = name.ToUpperInvariant(),
-                ToolTip = validUrl ? (name == "Twitch" ? "twitch.tv/rodrigorpmods" : name) : $"Configura el enlace de {name} en launcher.settings.json",
-                Style = (Style)FindResource("QuietButton"),
-                Width = name == "Twitch" ? 118 : 102,
-                Height = 34,
-                Padding = new Thickness(8, 2, 8, 2),
-                Margin = new Thickness(0, 0, 7, 0),
-                IsEnabled = validUrl
+                ToolTip = validUrl
+                    ? (name == "Twitch" ? "twitch.tv/rodrigorpmods" : uri!.Host)
+                    : $"Configura el enlace de {name} en launcher.settings.json",
+                Width = name switch { "YouTube" or "Twitch" => 112, "Discord" => 106, "TikTok" => 98, _ => 86 },
+                Height = 38,
+                Padding = new Thickness(9, 3, 9, 3),
+                Margin = new Thickness(0, 0, 8, 0),
+                IsEnabled = validUrl,
+                Style = (Style)FindResource("QuietButton")
             };
-            if (name == "Twitch")
+
+            var (startColor, endColor, borderColor) = name switch
             {
-                button.Content = new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Children =
-                    {
-                        new System.Windows.Controls.Image
-                        {
-                            Source = (System.Windows.Media.ImageSource)FindResource("TwitchMark"),
-                            Width = 16,
-                            Height = 16,
-                            Stretch = System.Windows.Media.Stretch.Uniform,
-                            Margin = new Thickness(0, 0, 6, 0)
-                        },
-                        new TextBlock { Text = "TWITCH", VerticalAlignment = VerticalAlignment.Center, FontWeight = FontWeights.SemiBold }
-                    }
-                };
-                button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(232, 71, 45, 125));
-                button.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(230, 165, 133, 255));
-                button.BorderThickness = new Thickness(1);
-                button.FontSize = 12;
-                button.FontWeight = FontWeights.SemiBold;
-                button.SetValue(System.Windows.Automation.AutomationProperties.NameProperty, "Abrir Twitch de rodrigorpmods");
-            }
+                "Discord" => (System.Windows.Media.Color.FromRgb(91, 79, 190), System.Windows.Media.Color.FromRgb(45, 40, 102), System.Windows.Media.Color.FromRgb(157, 145, 255)),
+                "YouTube" => (System.Windows.Media.Color.FromRgb(224, 47, 71), System.Windows.Media.Color.FromRgb(103, 24, 39), System.Windows.Media.Color.FromRgb(255, 137, 151)),
+                "Twitch" => (System.Windows.Media.Color.FromRgb(134, 73, 220), System.Windows.Media.Color.FromRgb(67, 36, 119), System.Windows.Media.Color.FromRgb(194, 153, 255)),
+                "TikTok" => (System.Windows.Media.Color.FromRgb(39, 79, 85), System.Windows.Media.Color.FromRgb(22, 36, 45), System.Windows.Media.Color.FromRgb(114, 222, 214)),
+                _ => (System.Windows.Media.Color.FromRgb(54, 82, 98), System.Windows.Media.Color.FromRgb(29, 41, 54), System.Windows.Media.Color.FromRgb(133, 177, 200))
+            };
+            button.Background = new System.Windows.Media.LinearGradientBrush(startColor, endColor, 40);
+            button.BorderBrush = new System.Windows.Media.SolidColorBrush(borderColor);
+            button.BorderThickness = new Thickness(1);
+            button.FontSize = 11;
+            button.FontWeight = FontWeights.SemiBold;
+
+            var content = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            content.Children.Add(new System.Windows.Controls.Image
+            {
+                Source = (System.Windows.Media.ImageSource)FindResource($"{name}Mark"),
+                Width = 17,
+                Height = 17,
+                Stretch = System.Windows.Media.Stretch.Uniform,
+                Margin = new Thickness(0, 0, 6, 0)
+            });
+            content.Children.Add(new TextBlock
+            {
+                Text = name.ToUpperInvariant(),
+                VerticalAlignment = VerticalAlignment.Center,
+                FontWeight = FontWeights.SemiBold
+            });
+            button.Content = content;
+            button.SetValue(System.Windows.Automation.AutomationProperties.NameProperty, $"Abrir {name}");
+
             if (validUrl) button.Click += (_, _) => OpenSocialLink(url!);
             SocialButtons.Children.Add(button);
         }
     }
-
     private void ApplyLanguage()
     {
         var language = _config.Language;
@@ -146,10 +166,23 @@ public partial class MainWindow : Window
         SettingsButton.ToolTip = UiText.Get(language, "settings");
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.6";
+        UpdateAudioControls();
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.7";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
+    private void Audio_VolumeChanged(object? sender, EventArgs e) => UpdateAudioControls();
+
+    private void UpdateAudioControls()
+    {
+        if (VolumeIcon is null) return;
+        VolumeIcon.Source = (System.Windows.Media.ImageSource)FindResource(_audio.IsMuted ? "AudioMutedMark" : "AudioOnMark");
+        VolumePopupToggle.ToolTip = _audio.IsPaused
+            ? UiText.Get(_config.Language, "audio_paused")
+            : UiText.Get(_config.Language, "sound");
+        MuteButton.Content = UiText.Get(_config.Language, _audio.IsMuted ? "unmute" : "mute");
+        MuteButton.IsEnabled = !_audio.IsPaused;
+    }
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
         var previousLanguage = _config.Language;
@@ -205,7 +238,7 @@ public partial class MainWindow : Window
                 await _viewModel.InstallOrUpdateGameAsync();
                 break;
             case LauncherState.ReadyToPlay:
-                StartGameProcess();
+                await StartGameProcessAsync();
                 break;
             case LauncherState.Error:
                 await _viewModel.CheckGamePresenceAsync();
@@ -287,7 +320,7 @@ public partial class MainWindow : Window
     private void VolumeToggle_Unchecked(object sender, RoutedEventArgs e) => VolumePopup.IsOpen = false;
     private void BackgroundVideo_MediaEnded(object sender, RoutedEventArgs e) { BackgroundVideo.Position = TimeSpan.Zero; BackgroundVideo.Play(); }
     private void BackgroundVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e) { _logger.Error("Background video playback failed", e.ErrorException); BackgroundVideo.Visibility = Visibility.Collapsed; }
-    private void StartGameProcess()
+    private async Task StartGameProcessAsync()
     {
         if (_gameProcess is not null)
         {
@@ -296,30 +329,60 @@ public partial class MainWindow : Window
             RestoreAfterGame(_gameProcess);
         }
 
+        _audio.Pause();
+        UpdateAudioControls();
         var process = _viewModel.LaunchGame();
-        if (process is null) return;
+        if (process is null)
+        {
+            _audio.Resume();
+            UpdateAudioControls();
+            return;
+        }
+
         _gameProcess = process;
         process.Exited += GameProcess_Exited;
 
         try
         {
-            if (process.HasExited)
+            var deadline = DateTime.UtcNow.AddSeconds(30);
+            IntPtr gameWindow = IntPtr.Zero;
+            while (DateTime.UtcNow < deadline)
             {
-                RestoreAfterGame(process);
+                await Task.Delay(120);
+                process.Refresh();
+                if (process.HasExited)
+                {
+                    RestoreAfterGame(process);
+                    return;
+                }
+
+                gameWindow = process.MainWindowHandle;
+                if (gameWindow != IntPtr.Zero) break;
+            }
+
+            if (gameWindow == IntPtr.Zero)
+            {
+                _logger.Error("UBF stayed running but did not create a main window within 30 seconds.");
+                _viewModel.NotifyGameWindowUnavailable();
+                _audio.Resume();
+                UpdateAudioControls();
                 return;
             }
 
             ShowInTaskbar = false;
             Hide();
             _gameWindowHidden = true;
+            if (!SetForegroundWindow(gameWindow))
+                _logger.Info("Windows did not allow UBF to take foreground focus after startup.");
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
-            _logger.Error("Could not monitor the UBF process", ex);
-            RestoreAfterGame(process);
+            _logger.Error("Could not wait for the UBF window", ex);
+            _audio.Resume();
+            UpdateAudioControls();
+            _viewModel.NotifyGameWindowUnavailable();
         }
     }
-
     private void GameProcess_Exited(object? sender, EventArgs e)
     {
         if (sender is not Process process) return;
@@ -343,7 +406,8 @@ public partial class MainWindow : Window
         catch (InvalidOperationException) { }
         process.Dispose();
 
-        if (_gameWindowHidden)
+        var gameWindowWasShown = _gameWindowHidden;
+        if (gameWindowWasShown)
         {
             _gameWindowHidden = false;
             ShowInTaskbar = true;
@@ -351,7 +415,10 @@ public partial class MainWindow : Window
             WindowState = WindowState.Normal;
             Activate();
         }
-        _viewModel.NotifyGameProcessExited();
+        _audio.Resume();
+        UpdateAudioControls();
+        if (gameWindowWasShown) _viewModel.NotifyGameProcessExited();
+        else _viewModel.NotifyGameStartupFailed();
     }
 
     private void Chrome_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { if (e.ClickCount == 1) DragMove(); }

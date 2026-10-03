@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DrawingImage x:Key="AudioOnMark">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Brush="White" Geometry="M3,9 L7,9 L13,4 L13,20 L7,15 L3,15 Z"/>
+        <GeometryDrawing Geometry="M16,8 C18,10 18,14 16,16">
+          <GeometryDrawing.Pen><Pen Brush="White" Thickness="2" StartLineCap="Round" EndLineCap="Round"/></GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="M18.5,5.5 C22,9 22,15 18.5,18.5">
+          <GeometryDrawing.Pen><Pen Brush="White" Thickness="2" StartLineCap="Round" EndLineCap="Round"/></GeometryDrawing.Pen>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+  <DrawingImage x:Key="AudioMutedMark">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Brush="White" Geometry="M3,9 L7,9 L13,4 L13,20 L7,15 L3,15 Z"/>
+        <GeometryDrawing Geometry="M16,9 L22,15 M22,9 L16,15">
+          <GeometryDrawing.Pen><Pen Brush="#FFFF7181" Thickness="2.3" StartLineCap="Round" EndLineCap="Round"/></GeometryDrawing.Pen>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+</ResourceDictionary>

@@ -108,7 +108,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 return;
             }
             State = LauncherState.ReadyToPlay;
+        {
             Status = UiText.Get(_language, "ready");
+            Details = "";
+        }
             Details = GetLocalGameDetails();
         }
         catch (Exception ex) { HandleError(UiText.Get(_language, "error_check_install"), ex); }
@@ -153,7 +156,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 _config.InstalledGameVersion = _manifest.Version;
                 ConfigurationService.Save(_config, _logger);
                 State = LauncherState.ReadyToPlay;
-                Status = UiText.Get(_language, "ready");
+            {
+            Status = UiText.Get(_language, "ready");
+            Details = "";
+        }
                 Details = UiText.Get(_language, "game_version", _manifest.Version);
             }
         }
@@ -198,7 +204,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
             ConfigurationService.Save(_config, _logger);
             _logger.Info($"Game operation completed; changed {count} files");
             State = LauncherState.ReadyToPlay;
+        {
             Status = UiText.Get(_language, "ready");
+            Details = "";
+        }
             Details = UiText.Get(_language, "game_version", _manifest.Version);
             Progress = 100;
             ProgressText = UiText.Get(_language, "install_verified");
@@ -249,10 +258,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public void NotifyGameWindowUnavailable()
+    {
+        Status = _language == "en" ? "UBF did not open a window" : "UBF no mostró su ventana";
+        Details = _language == "en"
+            ? "The process is still running. Check the game log before trying again."
+            : "El proceso sigue activo. Revisa el log del juego antes de volver a intentarlo.";
+    }
     public void NotifyGameProcessExited()
     {
         if (State == LauncherState.ReadyToPlay || State == LauncherState.Launching)
+        {
             Status = UiText.Get(_language, "ready");
+            Details = "";
+        }
+    }
+
+    public void NotifyGameStartupFailed()
+    {
+        Status = UiText.Get(_language, "game_start_failed");
+        Details = UiText.Get(_language, "game_start_failed_details");
     }
 
     public async Task<string> CheckLauncherUpdateAsync(bool allowAutoInstall = false)
@@ -262,7 +287,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             var remote = await _distribution.GetLauncherVersionAsync(timeout.Token);
             if (remote is null) return "launcher_no_metadata";
-            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.6";
+            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.7";
             LauncherUpdateAvailable = VersionUtility.IsNewer(remote.Version, current);
             if (LauncherUpdateAvailable) _logger.Info($"Launcher update available: {remote.Version}");
             OnPropertyChanged(nameof(PrimaryAction));
@@ -285,7 +310,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         try
         {
             var remote = await _distribution.GetLauncherVersionAsync() ?? throw new InvalidDataException("No launcher release metadata is available.");
-            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.6")) { LauncherUpdateAvailable = false; return; }
+            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.7")) { LauncherUpdateAvailable = false; return; }
             var installedUpdater = Path.Combine(AppContext.BaseDirectory, "UBFLauncherUpdater.exe");
             if (!File.Exists(installedUpdater)) throw new FileNotFoundException("The launcher updater is not installed beside the launcher.", installedUpdater);
             updateTemp = Path.Combine(Path.GetTempPath(), "UBFLauncherUpdate", Guid.NewGuid().ToString("N"));
