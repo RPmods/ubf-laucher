@@ -44,6 +44,10 @@ $debugSymbols = @(Get-ChildItem -LiteralPath $launcherOutput -Filter '*.pdb' -Re
 $debugSymbols | Remove-Item -Force
 
 $launcherVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($launcherExe).ProductVersion
+$updaterVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($updaterExe).ProductVersion
+if ($launcherVersion.Split('+')[0] -ne $updaterVersion.Split('+')[0]) {
+    throw "Launcher/updater versions do not match: launcher=$launcherVersion updater=$updaterVersion"
+}
 $managedFileManifest = Join-Path $launcherOutput 'UBFLauncher.files.json'
 $managedFiles = @(
     Get-ChildItem -LiteralPath $launcherOutput -Recurse -File |
@@ -71,6 +75,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archiveInfo = Get-Item -LiteralPath $archive
 $archiveHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
 Write-Host "Launcher version: $launcherVersion"
+Write-Host "Updater version: $updaterVersion"
 Write-Host "Launcher publish: $launcherOutput"
 Write-Host "Updater publish: $updaterOutput"
 Write-Host "Launcher update package: $archive"
