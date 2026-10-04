@@ -22,7 +22,7 @@ Las secuencias son independientes. Actualizar UBFLauncher no cambia, reemplaza n
 
 Versiones implementadas en esta revisión:
 - Juego UBF v1.0.4-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.4-beta.
-- UBFLauncher v1.0.13, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.13.
+- UBFLauncher v1.0.14, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.14.
 
 2. PRESENTACIÓN, INTRO Y AUDIO DE UBF
 ------------------------------------
@@ -104,9 +104,9 @@ Juego UBF v1.0.4-beta:
 - manifest.json publicado en main por el commit 70b830c.
 - PIE confirmó el árbol visible, la intro, el cambio al menú, el audio de intro seguido del loop y el video de fondo del menú.
 
-UBFLauncher v1.0.13:
+UBFLauncher v1.0.14:
 - Juego fijado: UBF v1.0.4-beta.
-- Tag `launcher-v1.0.13` apunta al commit `1d23185a02e5db406f04f2324d2857cba0af709a`.
-- Compilación Release correcta: 0 advertencias y 0 errores; las 23 pruebas pasaron. Se verificó la transición del perfil, los controles durante operaciones y el comportamiento sin actualización nueva.
-- ZIP publicado: `UBFLauncher-update.zip`, 350092440 bytes; SHA-256 `c6479ef789f4aba0ae72daa9c18a42208ca9610bdc11edbf41d125d1607dd050`.
-- Después de verificar v1.0.13 se retira la Release del launcher v1.0.12. Sus tags y fuentes permanecen; las Releases y tags del juego siguen intactos.
+- Tag `launcher-v1.0.14` apunta al commit `6d17ce33d73e869eb51a2d0068987a555da7f158`.
+- Compilación Release correcta: 0 advertencias y 0 errores; las 24 pruebas pasaron. Se verificó que una falla del updater conserva el juego local listo para JUGAR y que el updater lleva la misma versión del launcher.
+- ZIP publicado: `UBFLauncher-update.zip`, 350092599 bytes; SHA-256 `86854df51cdae7025a2f6562aff591cc426ab7e09ec090202bab155dcc027fa7`.
+- Después de verificar v1.0.14 se retira la Release del launcher v1.0.13. Sus tags y fuentes permanecen; las Releases y tags del juego siguen intactos.
