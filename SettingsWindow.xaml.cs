@@ -21,7 +21,7 @@ public partial class SettingsWindow : Window
         InstallPath.Text = config.InstallDirectory;
         AutomaticUpdates.IsChecked = config.AutomaticLauncherUpdates;
         LanguagePicker.SelectedValue = config.Language;
-        var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.15";
+        var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.16";
         AboutBody.Text = $"{UiText.Get(config.Language, "about_body")}\nVersión {version} · {Environment.OSVersion.VersionString}";
         ApplyLanguage(config.Language);
     }
@@ -38,6 +38,10 @@ public partial class SettingsWindow : Window
         BrowseButton.Content = UiText.Get(language, "browse");
         AutomaticUpdates.Content = UiText.Get(language, "automatic_updates");
         AutomaticHint.Text = UiText.Get(language, "automatic_updates_hint");
+        InstallationHeading.Text = language == "en" ? "INSTALLATION & UPDATES" : "INSTALACIÓN Y ACTUALIZACIONES";
+        LanguageHint.Text = language == "en" ? "Choose how the launcher text is displayed." : "Elige cómo se muestran los textos.";
+        MaintenanceHeading.Text = language == "en" ? "MAINTENANCE" : "MANTENIMIENTO";
+        MaintenanceHint.Text = language == "en" ? "Review local files and launcher updates." : "Revisa los archivos locales y las novedades del launcher.";
         VerifyGameButton.Content = UiText.Get(language, "verify_game");
         CheckUpdateButton.Content = UiText.Get(language, "check_launcher");
         SaveButton.Content = UiText.Get(language, "save_settings");
@@ -45,7 +49,7 @@ public partial class SettingsWindow : Window
         Title = UiText.Get(language, "settings_title");
         if (AboutBody is not null)
         {
-            var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.15";
+            var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.16";
             AboutBody.Text = $"{UiText.Get(language, "about_body")}\n{(language == "en" ? "Version" : "Versión")} {version} · {Environment.OSVersion.VersionString}";
         }
     }

@@ -55,6 +55,7 @@ public partial class MainWindow : Window
         ApplyLanguage();
         LoadBackgroundVideo();
         LoadLogo();
+        AnimateIdentityIn();
         BuildSocialLinks();
         await _viewModel.InitializeAsync();
         BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(850))
@@ -100,12 +101,39 @@ public partial class MainWindow : Window
             var path = ResolveAsset(_config.LogoPath);
             if (!File.Exists(path)) return;
             var logo = new System.Windows.Media.Imaging.BitmapImage(new Uri(path));
-            GameLogo.Source = logo;
+            HeroGameLogo.Source = logo;
             LauncherBrandIcon.Source = logo;
-            GameLogo.Visibility = Visibility.Visible;
-            Wordmark.Visibility = Visibility.Collapsed;
+            HeroGameLogo.Visibility = Visibility.Visible;
         }
         catch (Exception ex) { _logger.Error("Could not load game logo", ex); }
+    }
+
+    private void AnimateIdentityIn()
+    {
+        IdentityPanel.BeginAnimation(OpacityProperty, null);
+        IdentityTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, null);
+        IdentityPulse.BeginAnimation(OpacityProperty, null);
+
+        IdentityPanel.Opacity = 0;
+        IdentityTransform.X = -28;
+        IdentityPulse.Opacity = 0.42;
+
+        IdentityTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty,
+            new DoubleAnimation(0, TimeSpan.FromMilliseconds(620))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            });
+        IdentityPanel.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(1, TimeSpan.FromMilliseconds(540))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            });
+        IdentityPulse.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(0.38, 1, TimeSpan.FromMilliseconds(900))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever
+            });
     }
 
     private void BuildSocialLinks()
@@ -163,7 +191,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.15";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.16";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
