@@ -106,5 +106,7 @@ Juego UBF v1.0.4-beta:
 
 UBFLauncher v1.0.11:
 - Juego fijado: UBF v1.0.4-beta.
-- El tamaño y SHA-256 del artefacto se anotan al terminar la compilación/publicación actual.
-- La Release anterior del launcher se retira solo después de verificar el nuevo ZIP; Releases y tags del juego se mantienen intactos.
+- Tag `launcher-v1.0.11` apunta al commit `c61ec19885bb3242cf8c844a60ac218bfe2687c4`.
+- Compilación Release correcta: 0 advertencias y 0 errores; las 20 pruebas existentes pasaron. La ventana `UBF Launcher` abrió y respondió.
+- ZIP publicado: `UBFLauncher-update.zip`, 350087498 bytes; SHA-256 `ab1167e5ec791f414a3f5673e143a802804279c0531936d6642ed713066b526c`. La Release pública y la descarga devolvieron HTTP 200; el tamaño de GitHub coincide.
+- La Release anterior del launcher v1.0.10 se retira después de verificar el ZIP v1.0.11; se conserva el tag y las fuentes. Las Releases y tags del juego se mantienen intactos.
