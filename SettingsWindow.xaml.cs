@@ -21,7 +21,7 @@ public partial class SettingsWindow : Window
         InstallPath.Text = config.InstallDirectory;
         AutomaticUpdates.IsChecked = config.AutomaticLauncherUpdates;
         LanguagePicker.SelectedValue = config.Language;
-        var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.8";
+        var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.9";
         AboutBody.Text = $"{UiText.Get(config.Language, "about_body")}\nVersión {version} · {Environment.OSVersion.VersionString}";
         ApplyLanguage(config.Language);
     }
@@ -45,7 +45,7 @@ public partial class SettingsWindow : Window
         Title = UiText.Get(language, "settings_title");
         if (AboutBody is not null)
         {
-            var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.8";
+            var version = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.9";
             AboutBody.Text = $"{UiText.Get(language, "about_body")}\n{(language == "en" ? "Version" : "Versión")} {version} · {Environment.OSVersion.VersionString}";
         }
     }

@@ -12,7 +12,7 @@ Guía completa: [UBF_DISTRIBUTION_SETUP.txt](UBF_DISTRIBUTION_SETUP.txt).
 
 ## UBFLauncher
 
-Launcher 1.0.8 y juego 1.0.2-beta tienen versionado separado. El launcher se publica en RPmods/ubf-laucher con tag/Release y ZIP propios. `version.json` contiene la URL directa y SHA-256 del ZIP publicado; `version.json.example` es plantilla.
+Launcher 1.0.9 y juego 1.0.3-beta tienen versionado separado. El launcher se publica en RPmods/ubf-laucher con tag/Release y ZIP propios. `version.json` contiene la URL directa y SHA-256 del ZIP publicado; `version.json.example` es plantilla.
 
 JUGAR abre `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, muestra `INICIANDO...` y bloquea clics repetidos hasta que el juego cierre. El launcher mantiene su música pausada mientras UBF está abierto.
 
@@ -33,7 +33,8 @@ Usa Git LFS para videos grandes. No subir outputs generados ni credenciales.
 
 ## Releases publicadas
 
-- Juego UBF v1.0.2-beta: [Release](https://github.com/RPmods/ubf/releases/tag/v1.0.2-beta), ZIP 465028352 bytes; SHA-256 `253b5eb3a78a2d3042e0b5136e3801c1109b261ca9e06419e11ec1915f56fb85`.
-- UBFLauncher v1.0.8: [Release](https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.8), ZIP 350126292 bytes; SHA-256 `b422ca271b5095cfafdcf9c45a997735adeaf3610a5664d8c60b3d5d252d1461`.
-- Se conserva UBF v1.0.1-beta porque es una versión independiente del juego. Las Releases obsoletas del launcher v1.0.6 y v1.0.7 se retiraron tras verificar la v1.0.8; sus tags e historial Git se conservan.
+- Juego UBF v1.0.3-beta: [Release](https://github.com/RPmods/ubf/releases/tag/v1.0.3-beta), ZIP 435204941 bytes; SHA-256 `51a2b972429c617d59f9b1b655251f606b95f31b655a48c68fb6fbd3c8fd4664`.
+- UBFLauncher v1.0.9: [Release](https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.9), ZIP 350127170 bytes; SHA-256 `139a391cd1aa1e58efb2edd2fec28644cdc16342fa7e39541aefcfd33312a52d`.
+- Se conserva UBF v1.0.1-beta porque es una versión independiente del juego. Las Releases obsoletas del launcher v1.0.6, v1.0.7 y v1.0.8 se retiraron tras verificar la v1.0.9; sus tags e historial Git se conservan.
 - El manifiesto del juego y `version.json` del launcher están publicados en sus respectivas ramas `main`.
+

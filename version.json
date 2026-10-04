@@ -1,6 +1,6 @@
 {
-  "version": "1.0.8",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.8/UBFLauncher-update.zip",
-  "sha256": "b422ca271b5095cfafdcf9c45a997735adeaf3610a5664d8c60b3d5d252d1461",
-  "releaseNotes": "VERIFY no longer downloads the game ZIP. JUGAR launches the Shipping executable, shows INICIANDO... and blocks repeat clicks. Rejects the Unreal source Binaries/Win64 folder as an install path."
+  "version": "1.0.9",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.9/UBFLauncher-update.zip",
+  "sha256": "139a391cd1aa1e58efb2edd2fec28644cdc16342fa7e39541aefcfd33312a52d",
+  "releaseNotes": "UI refinada con tarjetas de estado, jerarquía visual y microinteracciones. Mantiene la verificación sin descargas repetidas y el arranque anti spam del juego."
 }

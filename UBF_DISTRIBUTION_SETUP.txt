@@ -4,15 +4,15 @@ UBF y UBFLauncher: distribución, instalación y Releases
 Estado de esta revisión — 2026-10-03
 ------------------------------------
 
-- Juego UBF: Unreal Engine 5.8.2, versión 1.0.2-beta.
-- Launcher: WPF/.NET 8, versión independiente 1.0.8.
+- Juego UBF: Unreal Engine 5.8.2, versión 1.0.3-beta.
+- Launcher: WPF/.NET 8, versión independiente 1.0.9.
 - Repositorios separados: RPmods/ubf y RPmods/ubf-laucher.
 - Releases, tags, paquetes ZIP y metadata de actualización nunca se comparten entre productos.
 
 | Producto | Repositorio | Tag de Release | Archivo de distribución |
 |---|---|---|---|
-| Juego UBF | RPmods/ubf | `v1.0.2-beta` | `UBF-v1.0.2-beta.zip` |
-| UBFLauncher | RPmods/ubf-laucher | `launcher-v1.0.8` | `UBFLauncher-update.zip` |
+| Juego UBF | RPmods/ubf | `v1.0.3-beta` | `UBF-v1.0.3-beta.zip` |
+| UBFLauncher | RPmods/ubf-laucher | `launcher-v1.0.9` | `UBFLauncher-update.zip` |
 
 1. Contenido y arranque de UBF
 -----------------------------
@@ -40,9 +40,9 @@ Ejemplo PowerShell. Pasa cada argumento por separado para conservar las rutas qu
 
 ```powershell
 $Project = 'C:\ruta\al\UBF\UBF.uproject'
-$Archive = 'D:\Builds\UBF-v1.0.2-beta-Win64-Shipping'
+$Archive = 'D:\Builds\UBF-v1.0.3-beta-Win64-Shipping'
 $UAT = 'C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat'
-& $UAT 'BuildCookRun' "-project=$Project" '-noP4' '-platform=Win64' '-clientconfig=Shipping' '-target=UBF' '-build' '-cook' '-stage' '-pak' '-archive' "-archivedirectory=$Archive" '-prereqs' '-unattended' '-utf8output'
+& $UAT 'BuildCookRun' "-project=$Project" '-noP4' '-platform=Win64' '-clientconfig=Shipping' '-target=UBF' '-build' '-cook' '-stage' '-pak' '-iostore' '-archive' "-archivedirectory=$Archive" '-prereqs' '-unattended' '-utf8output'
 if ($LASTEXITCODE -ne 0) { throw "UAT terminó con código $LASTEXITCODE" }
 ```
 
@@ -54,13 +54,13 @@ La carpeta que contiene `UBF.exe` (normalmente `Windows/`) es la raíz que recib
 `New-GamePackage.ps1` crea un ZIP sin carpeta envolvente, verifica `UBF.exe` en la raíz y excluye archivos `.pdb` de símbolos de depuración que no necesita el jugador. El build local conserva esos símbolos. El paquete debe quedar fuera de la carpeta build:
 
 ```powershell
-.\New-GamePackage.ps1 -BuildDirectory 'D:\Builds\UBF-v1.0.2-beta-Win64-Shipping\Windows' -Version '1.0.2-beta' -OutputDirectory 'D:\Builds\ReleaseStaging'
+.\New-GamePackage.ps1 -BuildDirectory 'D:\Builds\UBF-v1.0.3-beta-Win64-Shipping\Windows' -Version '1.0.3-beta' -OutputDirectory 'D:\Builds\ReleaseStaging'
 ```
 
-Sube las fuentes de UBF a `RPmods/ubf`, crea una Release con tag propio (por ejemplo `v1.0.2-beta`) y adjunta `UBF-v1.0.2-beta.zip`. Después de que el asset esté publicado, genera el manifest:
+Sube las fuentes de UBF a `RPmods/ubf`, crea una Release con tag propio (por ejemplo `v1.0.3-beta`) y adjunta `UBF-v1.0.3-beta.zip`. Después de que el asset esté publicado, genera el manifest:
 
 ```powershell
-.\New-GameManifest.ps1 -GameDirectory 'D:\Builds\UBF-v1.0.2-beta-Win64-Shipping\Windows' -Version '1.0.2-beta' -PackageFile 'D:\Builds\ReleaseStaging\UBF-v1.0.2-beta.zip' -PackageDownloadUrl 'https://github.com/RPmods/ubf/releases/download/v1.0.2-beta/UBF-v1.0.2-beta.zip'
+.\New-GameManifest.ps1 -GameDirectory 'D:\Builds\UBF-v1.0.3-beta-Win64-Shipping\Windows' -Version '1.0.3-beta' -PackageFile 'D:\Builds\ReleaseStaging\UBF-v1.0.3-beta.zip' -PackageDownloadUrl 'https://github.com/RPmods/ubf/releases/download/v1.0.3-beta/UBF-v1.0.3-beta.zip'
 ```
 
 El script lee la lista de archivos del ZIP y genera hashes solo para esos archivos, de modo que build, paquete y `manifest.json` coincidan exactamente. Publica `manifest.json` en la raíz de la rama principal de `RPmods/ubf`. Prueba el manifiesto y la descarga sin credenciales, y luego INSTALL, VERIFY y reparación desde UBFLauncher.
@@ -68,7 +68,7 @@ El script lee la lista de archivos del ZIP y genera hashes solo para esos archiv
 4. Funcionamiento de UBFLauncher
 --------------------------------
 
-`launcher.settings.json` define `TargetGameVersion` (`1.0.2-beta` en esta revisión) y habilita verificación SHA-256.
+`launcher.settings.json` define `TargetGameVersion` (`1.0.3-beta` en esta revisión) y habilita verificación SHA-256.
 
 - Al iniciar UBF, el reproductor del launcher pausa aunque el medio todavía esté abriéndose. Al cerrarse el juego, la música se reanuda.
 - El control de audio muestra un icono de altavoz, estado silenciado, deslizador y tooltip bilingüe.
@@ -81,7 +81,7 @@ El script lee la lista de archivos del ZIP y genera hashes solo para esos archiv
 5. Actualizar, compilar y probar UBFLauncher
 --------------------------------------------
 
-Cada cambio funcional requiere incrementar la versión del launcher en `UBFLauncher.csproj` y `app.manifest`. Revisa también los fallbacks de versión y `version.json.example`. Cambia `TargetGameVersion` únicamente cuando se publique una nueva versión del juego. Esta revisión publica UBFLauncher 1.0.8 y deja UBF en 1.0.2-beta.
+Cada cambio funcional requiere incrementar la versión del launcher en `UBFLauncher.csproj` y `app.manifest`. Revisa también los fallbacks de versión y `version.json.example`. Cambia `TargetGameVersion` únicamente cuando se publique una nueva versión del juego. Esta revisión publica UBFLauncher 1.0.9 y deja UBF en 1.0.3-beta.
 
 ```powershell
 dotnet build .\UBFLauncher.slnx -c Release
@@ -104,8 +104,8 @@ Después de probar el build actual:
 
 ```json
 {
-  "version": "1.0.8",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.8/UBFLauncher-update.zip",
+  "version": "1.0.9",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.9/UBFLauncher-update.zip",
   "sha256": "SHA256_REAL_DEL_ZIP",
   "releaseNotes": "Resumen de cambios"
 }
@@ -123,16 +123,17 @@ Cuando el launcher nuevo esté publicado y verificado, elimina solo Releases/art
 8. Releases de esta revisión
 ----------------------------
 
-- UBF v1.0.2-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.2-beta
-- UBFLauncher v1.0.8: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.8
-- Conserva UBF v1.0.1-beta; es una versión anterior del juego y no depende de la versión del launcher.
-- UBF 1.0.2-beta: ZIP de 465028352 bytes; SHA-256 `253b5eb3a78a2d3042e0b5136e3801c1109b261ca9e06419e11ec1915f56fb85`.
-- UBFLauncher 1.0.8: ZIP de 350126292 bytes; SHA-256 `b422ca271b5095cfafdcf9c45a997735adeaf3610a5664d8c60b3d5d252d1461`; ProductVersion referencia el commit `0f6916c`.
-- UBF 1.0.2-beta completó Unreal 5.8.2 Win64/Shipping Build, Cook, Stage y Archive con código 0. Cocinó 490 paquetes. La prueba de arranque desde launcher mantuvo la ventana activa durante la comprobación; el inicio directo se cerró antes de dejar el menú accesible.
-- El launcher 1.0.8 compiló con 0 advertencias y 0 errores; sus 20 pruebas pasaron. Incluyen verificaciones repetidas sin descarga, rechazo de `Binaries/Win64` y estado anti spam del botón al iniciar.
+- UBF v1.0.3-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.3-beta
+- UBFLauncher v1.0.9: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.9
+- Conserva UBF v1.0.1-beta y v1.0.2-beta; son versiones anteriores del juego y no dependen de la versión del launcher.
+- UBF 1.0.3-beta: ZIP de 435204941 bytes; SHA-256 `51a2b972429c617d59f9b1b655251f606b95f31b655a48c68fb6fbd3c8fd4664`.
+- UBFLauncher 1.0.9: ZIP de 350127170 bytes; SHA-256 `139a391cd1aa1e58efb2edd2fec28644cdc16342fa7e39541aefcfd33312a52d`; ProductVersion referencia el commit `0f6916c`.
+- UBF 1.0.3-beta completó Unreal 5.8.2 Win64/Shipping Build, Cook, Stage, IoStore y Archive con código 0. Cocinó 490 paquetes. La prueba Shipping abrió la ventana y permaneció activa durante la comprobación.
+- El launcher 1.0.9 compiló con 0 advertencias y 0 errores; sus 20 pruebas pasaron. Incluyen verificaciones repetidas sin descarga, rechazo de `Binaries/Win64`, estado anti spam y la nueva tarjeta de estado del UI.
 - La prueba del binario Shipping real abrió la ventana `UBF` y el proceso permaneció activo durante la comprobación.
 - Las dos URLs directas de los assets devolvieron HTTP 200 y tamaños iguales a los archivos locales.
-- Las Releases obsoletas del launcher v1.0.6 y v1.0.7 se retiraron después de verificar la nueva v1.0.8; se conservan ambos tags, commits y fuentes. La Release UBF v1.0.1-beta sigue publicada.
+- Las Releases obsoletas del launcher v1.0.6, v1.0.7 y v1.0.8 se retiraron después de verificar la nueva v1.0.9; se conservan sus tags, commits y fuentes. Las Releases UBF v1.0.1-beta y v1.0.2-beta siguen publicadas.
 
 No guardes credenciales/tokens en los repositorios. Conserva PNG, logos, iconos, fuentes, tags y commits necesarios para reproducir el historial.
+
 
