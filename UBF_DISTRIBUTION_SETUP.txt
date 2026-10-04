@@ -127,7 +127,7 @@ Cuando el launcher nuevo esté publicado y verificado, elimina solo Releases/art
 - UBFLauncher v1.0.9: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.9
 - Conserva UBF v1.0.1-beta y v1.0.2-beta; son versiones anteriores del juego y no dependen de la versión del launcher.
 - UBF 1.0.3-beta: ZIP de 435204941 bytes; SHA-256 `51a2b972429c617d59f9b1b655251f606b95f31b655a48c68fb6fbd3c8fd4664`.
-- UBFLauncher 1.0.9: ZIP de 350127170 bytes; SHA-256 `139a391cd1aa1e58efb2edd2fec28644cdc16342fa7e39541aefcfd33312a52d`; ProductVersion referencia el commit `0f6916c`.
+- UBFLauncher 1.0.9: ZIP de 350127182 bytes; SHA-256 `50338c6e1152c0d63ed2e6cc2751d103ae62c78f6f2a20d050fbaaea2f8b4809`; ProductVersion referencia el commit `7ad4eb2`.
 - UBF 1.0.3-beta completó Unreal 5.8.2 Win64/Shipping Build, Cook, Stage, IoStore y Archive con código 0. Cocinó 490 paquetes. La prueba Shipping abrió la ventana y permaneció activa durante la comprobación.
 - El launcher 1.0.9 compiló con 0 advertencias y 0 errores; sus 20 pruebas pasaron. Incluyen verificaciones repetidas sin descarga, rechazo de `Binaries/Win64`, estado anti spam y la nueva tarjeta de estado del UI.
 - La prueba del binario Shipping real abrió la ventana `UBF` y el proceso permaneció activo durante la comprobación.
@@ -135,5 +135,6 @@ Cuando el launcher nuevo esté publicado y verificado, elimina solo Releases/art
 - Las Releases obsoletas del launcher v1.0.6, v1.0.7 y v1.0.8 se retiraron después de verificar la nueva v1.0.9; se conservan sus tags, commits y fuentes. Las Releases UBF v1.0.1-beta y v1.0.2-beta siguen publicadas.
 
 No guardes credenciales/tokens en los repositorios. Conserva PNG, logos, iconos, fuentes, tags y commits necesarios para reproducir el historial.
+
 
 
