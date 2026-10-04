@@ -1,6 +1,6 @@
 {
-  "version": "1.0.15",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.15/UBFLauncher-update.zip",
-  "sha256": "c99ebae331a29ea5cdd042f7483d8e3349e246a64498c49c0202470c2ad84e13",
-  "releaseNotes": "Corrige la excepción al iniciar de la barra de progreso y conserva su animación segura durante verificación y descarga."
+  "version": "1.0.16",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.16/UBFLauncher-update.zip",
+  "sha256": "7f45ed56da654b8815f0efd69d32eadfcbf3368e4d9ae27a6b55c2ec760bc76a",
+  "releaseNotes": "Hace visible el título del juego, mueve el logo a una zona principal animada y reorganiza la configuración del launcher."
 }
