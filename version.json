@@ -1,6 +1,6 @@
 {
-  "version": "1.0.12",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.12/UBFLauncher-update.zip",
-  "sha256": "569dea8722aad76c182963f4d6c83fea0a60ba9aaf6c5239167ff332bc381796",
-  "releaseNotes": "Repara la descarga y el reemplazo de actualizaciones, limpia archivos administrados obsoletos y mejora la interfaz del launcher."
+  "version": "1.0.13",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.13/UBFLauncher-update.zip",
+  "sha256": "c6479ef789f4aba0ae72daa9c18a42208ca9610bdc11edbf41d125d1607dd050",
+  "releaseNotes": "Corrige el flujo de perfil, anima el progreso de descarga y compacta la interfaz sin cubrir el fondo."
 }
