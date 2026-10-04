@@ -108,7 +108,7 @@
 
                         <Button x:Name="PrimaryButton" Content="{Binding PrimaryAction}" IsEnabled="{Binding CanUsePrimaryAction}" Style="{StaticResource PrimaryButton}"
                                 Height="43" HorizontalAlignment="Stretch" Margin="0,15,0,0" Click="Primary_Click" />
-                        <Button x:Name="LauncherUpdateButton" Content="ACTUALIZAR LAUNCHER" Style="{StaticResource QuietButton}" Height="34" HorizontalAlignment="Stretch" Margin="0,8,0,0"
+                        <Button x:Name="LauncherUpdateButton" Content="ACTUALIZAR LAUNCHER" IsEnabled="{Binding CanVerify}" Style="{StaticResource QuietButton}" Height="34" HorizontalAlignment="Stretch" Margin="0,8,0,0"
                                 Visibility="Collapsed" Click="LauncherUpdate_Click" />
                         <UniformGrid Columns="3" Margin="0,7,0,0">
                             <Button x:Name="VerifyButton" Content="VERIFICAR" IsEnabled="{Binding CanVerify}" Style="{StaticResource QuietButton}" Margin="0,0,3,0" Click="Verify_Click" />
@@ -146,7 +146,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="UBF  /  LAUNCHER" Foreground="White" FontSize="10" FontWeight="Bold" />
-                    <TextBlock x:Name="LauncherBadge" Text="V1.0.13" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
+                    <TextBlock x:Name="LauncherBadge" Text="V1.0.14" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>

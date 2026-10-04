@@ -400,6 +400,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
         if (IsBusy) return;
         IsBusy = true;
         var updateHandoffStarted = false;
+        var stateBeforeUpdate = State;
+        var statusBeforeUpdate = Status;
+        var detailsBeforeUpdate = Details;
         string? updateTemp = null;
         try
         {
@@ -450,7 +453,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             {
                 try { if (Directory.Exists(updateTemp)) Directory.Delete(updateTemp, true); } catch { }
             }
-            HandleError(UiText.Get(_language, "error_launcher_update"), ex);
+            HandleLauncherUpdateFailure(stateBeforeUpdate, statusBeforeUpdate, detailsBeforeUpdate, ex);
         }
         finally
         {
@@ -560,6 +563,19 @@ public sealed class MainViewModel : INotifyPropertyChanged
         RefreshVersionProperties();
     }
 
+    private void HandleLauncherUpdateFailure(LauncherState stateBeforeUpdate, string statusBeforeUpdate, string detailsBeforeUpdate, Exception ex)
+    {
+        var restoredState = stateBeforeUpdate is LauncherState.ReadyToPlay or LauncherState.NotInstalled or LauncherState.Updating or LauncherState.Repairing
+            ? stateBeforeUpdate
+            : HasLocalGameExecutable ? LauncherState.ReadyToPlay : LauncherState.NotInstalled;
+        _logger.Error(UiText.Get(_language, "error_launcher_update"), ex);
+        State = restoredState;
+        Status = statusBeforeUpdate;
+        var error = UiText.Get(_language, "error_launcher_update");
+        Details = string.IsNullOrWhiteSpace(detailsBeforeUpdate) ? error : $"{detailsBeforeUpdate} {error}";
+        RefreshVersionProperties();
+    }
+
     private void SetAvailableGameVersion(string version)
     {
         _availableGameVersion = version;
@@ -591,7 +607,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsProgressIndeterminate));
     }
 
-    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.13";
+    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.14";
 
     private enum RetryOperation { Verify, Install }
 
