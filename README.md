@@ -12,7 +12,7 @@ Guía de build, validación y publicación: [UBF_DISTRIBUTION_SETUP.txt](UBF_DIS
 
 ## UBFLauncher
 
-Launcher v1.0.17 apunta al juego UBF v1.0.4-beta. Los números no se sincronizan: publicar una actualización del launcher no crea, reemplaza ni retira una Release del juego. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
+La Release pública del launcher es v1.0.17; el código de esta revisión prepara v1.0.18 y apunta al juego UBF v1.0.5-beta. Los números no se sincronizan: publicar una actualización del launcher no crea, reemplaza ni retira una Release del juego. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
 
 JUGAR inicia `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, cambia a `INICIANDO...` y bloquea clics repetidos. El audio del launcher se pausa mientras UBF está abierto.
 
@@ -33,6 +33,6 @@ Usa Git LFS para recursos de video grandes. No subas salidas generadas ni creden
 
 ## Releases actuales
 
-- Juego UBF v1.0.4-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.4-beta. ZIP `UBF-v1.0.4-beta.zip`, 488806022 bytes, SHA-256 `5055229aed8d623e1da2131fc92df26029c052bd0e329837b355b29b5b5239e1`.
+- Juego UBF v1.0.5-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.5-beta. Consulta la Release para obtener el ZIP y su metadata vigentes.
 - UBFLauncher v1.0.17: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.17. ZIP `UBFLauncher-update.zip`, 350094539 bytes, SHA-256 `855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48`.
-- Tras verificar v1.0.17, se retira la Release del launcher v1.0.16; sus tags y fuentes siguen en Git. Se conservan las Releases del juego, desde v1.0.1-beta hasta v1.0.4-beta.
+- Cuando v1.0.18 se compile, se pruebe y se publique, retirar únicamente la Release obsoleta del launcher que la precede; conservar sus tags y fuentes, y todas las Releases del juego.

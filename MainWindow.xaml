@@ -68,10 +68,7 @@
                     <StackPanel>
                         <StackPanel>
                             <TextBlock x:Name="GameSectionLabel" Text="EL JUEGO" Foreground="{StaticResource AccentBrush}" FontSize="11" FontWeight="Bold" />
-                            <TextBlock Text="UNIVERSAL BREAKING FIGHTERS" Foreground="#FFB8C3C6" FontSize="10" Margin="0,4,0,0" />
                         </StackPanel>
-                        <TextBlock x:Name="Wordmark" Text="UBF" Foreground="White" FontSize="38" FontWeight="Black" Margin="-2,6,0,-3" />
-                        <Border Width="38" Height="3" Background="{StaticResource AccentBrush}" HorizontalAlignment="Left" Margin="0,6,0,13" />
 
                         <TextBlock Text="{Binding Status}" Foreground="White" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding Details}" Foreground="#FFD0D7D9" FontSize="12" TextWrapping="Wrap" Margin="0,5,0,0" MinHeight="18" />
@@ -140,7 +137,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="UBF  /  LAUNCHER" Foreground="White" FontSize="10" FontWeight="Bold" />
-                    <TextBlock x:Name="LauncherBadge" Text="V1.0.17" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
+                    <TextBlock x:Name="LauncherBadge" Text="V1.0.18" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>

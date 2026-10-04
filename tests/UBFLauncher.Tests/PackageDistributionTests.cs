@@ -107,7 +107,7 @@ public sealed class PackageDistributionTests
         using var temp = new TemporaryDirectory();
         var logger = new Logger(Path.Combine(temp.Path, "launcher-noop.log"));
         var config = new LauncherConfig { InstallDirectory = Path.Combine(temp.Path, "game") };
-        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.17" });
+        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.18" });
         using var audio = new AudioService(config, logger);
         var verifier = new GameVerifier(logger);
         var viewModel = new MainViewModel(config, remote, verifier, new GameInstaller(remote, verifier, logger), audio, logger);

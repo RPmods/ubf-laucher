@@ -20,9 +20,10 @@ UBFLauncher
 
 Las secuencias son independientes. Actualizar UBFLauncher no cambia, reemplaza ni retira un juego. Eliminar una Release obsoleta del launcher nunca autoriza eliminar una Release del juego. No eliminar tags, commits ni fuentes necesarios para reconstruir versiones.
 
-Versiones implementadas en esta revisión:
-- Juego UBF v1.0.4-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.4-beta.
+Versiones públicas de referencia:
+- Juego UBF v1.0.5-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.5-beta.
 - UBFLauncher v1.0.17, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.17.
+- El código candidato a publicar como UBFLauncher v1.0.18 debe verificarse como se describe abajo; no afirmar que existe una Release antes de subir y comprobar su asset.
 
 2. PRESENTACIÓN, INTRO Y AUDIO DE UBF
 ------------------------------------
@@ -80,20 +81,20 @@ El script comprueba que el manifest y el ZIP coincidan con la build; publicar el
 
 1. Modificar el proyecto fuente en D:\proyectos\UBFLauncher y mantener el repositorio fuente en RPmods/ubf-laucher actualizado.
 2. Incrementar la versión propia del launcher en UBFLauncher.csproj, app.manifest, badge/fallbacks de versión y version.json.example. Mantener version.json sincronizado después de publicar el asset.
-3. Cambiar Settings.TargetGameVersion en launcher.settings.json y Models/LauncherConfig.cs solamente cuando haya una versión nueva del juego publicada y su manifest corresponda. No igualar ambas versiones por obligación.
+3. Cambiar Settings.TargetGameVersion en launcher.settings.json y Models/LauncherConfig.cs solamente cuando haya una versión nueva del juego publicada y su manifest corresponda. No igualar ambas versiones por obligación. En esta revisión el launcher apunta al juego v1.0.5-beta.
 4. Compilar y correr la suite existente:
 
    dotnet build .\UBFLauncher.slnx -c Release
    dotnet test .\tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj -c Release
 
-5. Hacer una prueba básica visible de UBFLauncher. Comprobar que carga la ventana, medios y configuración; VERIFICAR no debe bajar ZIP cuando hashes y versión local ya coinciden; INSTALAR/ACTUALIZAR debe mostrar progreso; JUGAR debe pasar a INICIANDO..., rechazar clics repetidos y abrir el ejecutable Shipping del juego; la música del launcher debe pausarse mientras el juego esté abierto.
+5. Hacer una prueba básica visible de UBFLauncher. Comprobar que carga la ventana, medios y configuración; VERIFICAR no debe bajar ZIP cuando hashes y versión local ya coinciden; INSTALAR/ACTUALIZAR debe mostrar progreso; JUGAR debe pasar a INICIANDO..., rechazar clics repetidos y abrir el ejecutable Shipping del juego; la música del launcher debe pausarse mientras el juego esté abierto. Una prueba unitaria de animación no sustituye esta comprobación interactiva.
 6. Ejecutar .\publish.ps1. El script compila self-contained launcher y updater, verifica los .exe y medios, retira archivos .pdb de depuración del artefacto y produce publish/UBFLauncher-update.zip. Limpia únicamente las carpetas de build/archive dentro de publish/; no borra el código, tags, historial, ni Releases remotas. No reutilizar ningún ZIP anterior.
 7. Inspeccionar ProductVersion del ejecutable, tamaño y SHA-256 del ZIP actual. Confirmar que el ZIP se generó después de los cambios funcionales y que sus recursos están presentes.
 8. Confirmar la prueba básica antes de crear la Release. Crear tag launcher-v<versión> sobre el commit probado, crear Release en RPmods/ubf-laucher y adjuntar el ZIP recién construido. La publicación se hace solo cuando el asset correcto esté cargado.
 9. Tras publicar, actualizar version.json en main con la versión del launcher, URL directa del asset y SHA-256 medido. Es una metadata distinta del manifest del juego. Verificar la descarga pública, tamaño y hash del asset.
 10. Solo cuando la nueva Release esté publicada y verificada, retirar la Release/artefacto de launcher anterior que ya quedó obsoleto. Eliminar la Release no es eliminar el tag ni el commit; conservar tags y fuentes reproducibles. Nunca borrar Releases, ZIPs ni historial de UBF por esta limpieza.
 
-5. ESTADO VERIFICADO DE ESTA PUBLICACIÓN
+5. ESTADO HISTÓRICO DE LA PUBLICACIÓN
 ----------------------------------------
 
 Juego UBF v1.0.4-beta:
@@ -110,3 +111,11 @@ UBFLauncher v1.0.17:
 - Compilación Release correcta: 0 advertencias y 0 errores; las 24 pruebas pasaron. La apertura real del ejecutable publicado durante 12 segundos no registró excepciones de UI. La identidad principal muestra solamente el logo grande con una entrada animada.
 - ZIP publicado: `UBFLauncher-update.zip`, 350094539 bytes; SHA-256 `855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48`.
 - Después de verificar v1.0.17 se retira la Release del launcher v1.0.16. Sus tags y fuentes permanecen; las Releases y tags del juego siguen intactos.
+
+6. REVISIÓN DEL CANDIDATO v1.0.18
+---------------------------------
+
+- Cambios funcionales: reparación de la animación de progreso para evitar animar una transformación WPF congelada; nuevo test STA que carga el template real y comprueba que no haya excepciones del Dispatcher; limpieza de identidad visual solicitada; versión objetivo sincronizada con el juego v1.0.5-beta.
+- En el clon oficial, `dotnet build UBFLauncher.csproj --configuration Release --no-restore` terminó con 0 advertencias y 0 errores; las 25 pruebas de `UBFLauncher.Tests` pasaron. El test STA verifica que las posiciones de ambas bandas de progreso cambien y que el Dispatcher no registre excepciones.
+- No marcar la prueba interactiva como realizada mientras no se abra el ejecutable generado y se verifique su flujo. Solo después de la prueba básica puede publicarse v1.0.18 y retirarse el release anterior del launcher.
+- No tocar las Releases, los ZIP ni los tags del juego al limpiar releases del launcher.

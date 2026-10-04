@@ -10,8 +10,8 @@ public sealed class AnimatedProgressBar : ProgressBar
     private const string ShimmerPartName = "ProgressShimmer";
     private const string IndeterminatePartName = "IndeterminateIndicator";
 
-    private TranslateTransform? _shimmerTransform;
-    private TranslateTransform? _indeterminateTransform;
+    private FrameworkElement? _shimmerElement;
+    private FrameworkElement? _indeterminateElement;
 
     public AnimatedProgressBar()
     {
@@ -25,8 +25,8 @@ public sealed class AnimatedProgressBar : ProgressBar
         StopAnimations();
         base.OnApplyTemplate();
 
-        _shimmerTransform = GetTransform(GetTemplateChild(ShimmerPartName) as FrameworkElement);
-        _indeterminateTransform = GetTransform(GetTemplateChild(IndeterminatePartName) as FrameworkElement);
+        _shimmerElement = GetTemplateChild(ShimmerPartName) as FrameworkElement;
+        _indeterminateElement = GetTemplateChild(IndeterminatePartName) as FrameworkElement;
 
         StartAnimations();
     }
@@ -51,43 +51,37 @@ public sealed class AnimatedProgressBar : ProgressBar
 
     private void RestartShimmerAnimation()
     {
-        if (!IsLoaded || _shimmerTransform is null) return;
+        if (!IsLoaded || _shimmerElement is null) return;
 
-        _shimmerTransform.BeginAnimation(TranslateTransform.XProperty, CreateMarquee(-100, Math.Max(320, ActualWidth + 100), 1.35));
+        _shimmerElement.BeginAnimation(FrameworkElement.MarginProperty,
+            CreateMarquee(-100, Math.Max(320, ActualWidth + 100), 1.35));
     }
 
     private void UpdateIndeterminateAnimation()
     {
-        if (_indeterminateTransform is null) return;
+        if (_indeterminateElement is null) return;
 
         if (!IsLoaded || !IsIndeterminate)
         {
-            _indeterminateTransform.BeginAnimation(TranslateTransform.XProperty, null);
-            _indeterminateTransform.X = -110;
+            _indeterminateElement.BeginAnimation(FrameworkElement.MarginProperty, null);
+            _indeterminateElement.Margin = new Thickness(-110, 0, 0, 0);
             return;
         }
 
-        _indeterminateTransform.BeginAnimation(TranslateTransform.XProperty, CreateMarquee(-110, Math.Max(320, ActualWidth + 100), 0.85));
+        _indeterminateElement.BeginAnimation(FrameworkElement.MarginProperty,
+            CreateMarquee(-110, Math.Max(320, ActualWidth + 100), 0.85));
     }
 
     private void StopAnimations()
     {
-        _shimmerTransform?.BeginAnimation(TranslateTransform.XProperty, null);
-        _indeterminateTransform?.BeginAnimation(TranslateTransform.XProperty, null);
+        _shimmerElement?.BeginAnimation(FrameworkElement.MarginProperty, null);
+        _indeterminateElement?.BeginAnimation(FrameworkElement.MarginProperty, null);
     }
 
-    private static TranslateTransform? GetTransform(FrameworkElement? element)
+    private static ThicknessAnimation CreateMarquee(double from, double to, double seconds) => new()
     {
-        if (element is null) return null;
-        var transform = new TranslateTransform();
-        element.RenderTransform = transform;
-        return transform;
-    }
-
-    private static DoubleAnimation CreateMarquee(double from, double to, double seconds) => new()
-    {
-        From = from,
-        To = to,
+        From = new Thickness(from, 0, 0, 0),
+        To = new Thickness(to, 0, 0, 0),
         Duration = TimeSpan.FromSeconds(seconds),
         RepeatBehavior = RepeatBehavior.Forever
     };

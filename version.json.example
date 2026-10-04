@@ -1,6 +1,6 @@
 {
-  "version": "1.0.17",
+  "version": "1.0.18",
   "downloadUrl": "",
   "sha256": "",
-  "releaseNotes": "Describe el cambio funcional de esta versión del launcher."
+  "releaseNotes": "Corrige la animación de progreso y actualiza la versión objetivo del juego."
 }
