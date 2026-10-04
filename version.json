@@ -1,6 +1,6 @@
 {
-  "version": "1.0.16",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.16/UBFLauncher-update.zip",
-  "sha256": "7f45ed56da654b8815f0efd69d32eadfcbf3368e4d9ae27a6b55c2ec760bc76a",
-  "releaseNotes": "Hace visible el título del juego, mueve el logo a una zona principal animada y reorganiza la configuración del launcher."
+  "version": "1.0.17",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.17/UBFLauncher-update.zip",
+  "sha256": "855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48",
+  "releaseNotes": "Simplifica la identidad visual y deja el logo grande como único elemento principal del juego."
 }

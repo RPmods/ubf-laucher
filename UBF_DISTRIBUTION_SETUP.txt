@@ -22,7 +22,7 @@ Las secuencias son independientes. Actualizar UBFLauncher no cambia, reemplaza n
 
 Versiones implementadas en esta revisión:
 - Juego UBF v1.0.4-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.4-beta.
-- UBFLauncher v1.0.16, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.16.
+- UBFLauncher v1.0.17, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.17.
 
 2. PRESENTACIÓN, INTRO Y AUDIO DE UBF
 ------------------------------------
@@ -104,9 +104,9 @@ Juego UBF v1.0.4-beta:
 - manifest.json publicado en main por el commit 70b830c.
 - PIE confirmó el árbol visible, la intro, el cambio al menú, el audio de intro seguido del loop y el video de fondo del menú.
 
-UBFLauncher v1.0.16:
+UBFLauncher v1.0.17:
 - Juego fijado: UBF v1.0.4-beta.
-- Tag `launcher-v1.0.16` apunta al commit `8bb5a3b2434b155b9c8cd8656136f6d3dd30aa10`.
-- Compilación Release correcta: 0 advertencias y 0 errores; las 24 pruebas pasaron. La apertura real del ejecutable publicado durante 12 segundos no registró excepciones de UI. La identidad principal muestra el logo en grande, título con entrada animada y una configuración reorganizada.
-- ZIP publicado: `UBFLauncher-update.zip`, 350094777 bytes; SHA-256 `7f45ed56da654b8815f0efd69d32eadfcbf3368e4d9ae27a6b55c2ec760bc76a`.
-- Después de verificar v1.0.16 se retira la Release del launcher v1.0.15. Sus tags y fuentes permanecen; las Releases y tags del juego siguen intactos.
+- Tag `launcher-v1.0.17` apunta al commit `7968a6943dca1ac5f181db01fd04b870210d0bcd`.
+- Compilación Release correcta: 0 advertencias y 0 errores; las 24 pruebas pasaron. La apertura real del ejecutable publicado durante 12 segundos no registró excepciones de UI. La identidad principal muestra solamente el logo grande con una entrada animada.
+- ZIP publicado: `UBFLauncher-update.zip`, 350094539 bytes; SHA-256 `855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48`.
+- Después de verificar v1.0.17 se retira la Release del launcher v1.0.16. Sus tags y fuentes permanecen; las Releases y tags del juego siguen intactos.
