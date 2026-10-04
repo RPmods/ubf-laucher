@@ -1,27 +1,48 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text.Json;
 using UBFLauncher.Models;
 
 namespace UBFLauncher.Services;
 
 public sealed class GameInstaller(IDistributionService distribution, GameVerifier verifier, Logger logger)
 {
+    private const string ManagedFilesName = ".ubf-installation.json";
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+
+    public int GetPendingCleanupCount(string root, GameManifest manifest)
+    {
+        var expected = GetManifestPaths(manifest);
+        return GetManagedFiles(root).Count(path => !expected.Contains(path));
+    }
+
     public async Task<int> InstallOrRepairAsync(string root, GameManifest manifest, IProgress<OperationProgress>? progress,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(manifest);
         Directory.CreateDirectory(root);
-        var invalid = await verifier.FindInvalidFilesAsync(root, manifest, cancellationToken: cancellationToken);
-        if (invalid.Count == 0) return 0;
-
-        var package = manifest.Package ?? throw new InvalidDataException("The game manifest has no ZIP package metadata.");
-        ValidatePackageMetadata(package);
-
+        CleanStaleOperations(root);
         var installRoot = Path.GetFullPath(root);
+        var expectedPaths = GetManifestPaths(manifest);
+        var invalid = await verifier.FindInvalidFilesAsync(root, manifest, cancellationToken: cancellationToken);
+        var obsolete = GetManagedFiles(installRoot).Where(path => !expectedPaths.Contains(path)).ToArray();
+        if (invalid.Count == 0 && obsolete.Length == 0)
+        {
+            SaveManagedFiles(installRoot, manifest.Version, expectedPaths);
+            return 0;
+        }
+
+        GamePackage? package = null;
+        if (invalid.Count > 0)
+        {
+            package = manifest.Package ?? throw new InvalidDataException("The game manifest has no ZIP package metadata.");
+            ValidatePackageMetadata(package);
+        }
+
         var operation = Path.Combine(installRoot, ".ubf-staging-" + Guid.NewGuid().ToString("N"));
         var staged = Path.Combine(operation, "new");
-        var packagePath = Path.Combine(operation, package.FileName);
+        var packagePath = package is null ? null : Path.Combine(operation, package.FileName);
         var backup = Path.Combine(operation, "backup");
         Directory.CreateDirectory(staged);
         Directory.CreateDirectory(backup);
@@ -31,34 +52,37 @@ public sealed class GameInstaller(IDistributionService distribution, GameVerifie
 
         try
         {
-            var downloadProgress = new Progress<(long Received, long Total)>(value =>
+            if (package is not null && packagePath is not null)
             {
-                var total = value.Total > 0 ? value.Total : package.Size;
-                progress?.Report(new OperationProgress(package.FileName, value.Received, total,
-                    value.Received, package.Size, value.Received / Math.Max(clock.Elapsed.TotalSeconds, 0.1)));
-            });
-            logger.Info($"Downloading game ZIP package {package.FileName}");
-            await distribution.DownloadGamePackageAsync(package, packagePath, downloadProgress, cancellationToken);
+                var downloadProgress = new Progress<(long Received, long Total)>(value =>
+                {
+                    var total = value.Total > 0 ? value.Total : package.Size;
+                    progress?.Report(new OperationProgress(package.FileName, value.Received, total,
+                        value.Received, package.Size, value.Received / Math.Max(clock.Elapsed.TotalSeconds, 0.1)));
+                });
+                logger.Info($"Downloading game ZIP package {package.FileName}");
+                await distribution.DownloadGamePackageAsync(package, packagePath, downloadProgress, cancellationToken);
 
-            var downloadedPackage = new FileInfo(packagePath);
-            if (!downloadedPackage.Exists || downloadedPackage.Length != package.Size)
-                throw new InvalidDataException($"Game ZIP size does not match the manifest. Expected {package.Size} bytes.");
+                var downloadedPackage = new FileInfo(packagePath);
+                if (!downloadedPackage.Exists || downloadedPackage.Length != package.Size)
+                    throw new InvalidDataException($"Game ZIP size does not match the manifest. Expected {package.Size} bytes.");
 
-            await using (var stream = new FileStream(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 128 * 1024, true))
-            {
-                var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
-                if (!hash.Equals(package.Sha256, StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException("Game ZIP failed SHA-256 validation.");
+                await using (var stream = new FileStream(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 128 * 1024, true))
+                {
+                    var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
+                    if (!hash.Equals(package.Sha256, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidDataException("Game ZIP failed SHA-256 validation.");
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                await ExtractPackageSafelyAsync(packagePath, staged, manifest, cancellationToken);
+                var invalidStagedFiles = await verifier.FindInvalidFilesAsync(staged, manifest, cancellationToken: cancellationToken);
+                if (invalidStagedFiles.Count > 0)
+                    throw new InvalidDataException($"The extracted package failed file verification: {string.Join(", ", invalidStagedFiles.Take(5).Select(file => file.Path))}");
+                if (!manifest.Files.Any(file => file.Path.Equals("UBF.exe", StringComparison.OrdinalIgnoreCase)) ||
+                    !File.Exists(GameVerifier.ResolvePath(staged, "UBF.exe")))
+                    throw new InvalidDataException("The extracted game package does not contain UBF.exe at its root.");
             }
-
-            cancellationToken.ThrowIfCancellationRequested();
-            await ExtractPackageSafelyAsync(packagePath, staged, manifest, cancellationToken);
-            var invalidStagedFiles = await verifier.FindInvalidFilesAsync(staged, manifest, cancellationToken: cancellationToken);
-            if (invalidStagedFiles.Count > 0)
-                throw new InvalidDataException($"The extracted package failed file verification: {string.Join(", ", invalidStagedFiles.Take(5).Select(file => file.Path))}");
-            if (!manifest.Files.Any(file => file.Path.Equals("UBF.exe", StringComparison.OrdinalIgnoreCase)) ||
-                !File.Exists(GameVerifier.ResolvePath(staged, "UBF.exe")))
-                throw new InvalidDataException("The extracted game package does not contain UBF.exe at its root.");
 
             foreach (var file in invalid)
             {
@@ -86,10 +110,28 @@ public sealed class GameInstaller(IDistributionService distribution, GameVerifie
                 committed.Add((destination, saved));
             }
 
-            logger.Info($"Installed or repaired {invalid.Count} game files from ZIP for version {manifest.Version}");
-            progress?.Report(new OperationProgress(package.FileName, package.Size, package.Size,
-                package.Size, package.Size, package.Size / Math.Max(clock.Elapsed.TotalSeconds, 0.1)));
-            return invalid.Count;
+            foreach (var relativePath in obsolete)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var destination = GameVerifier.ResolvePath(installRoot, relativePath);
+                if (!File.Exists(destination)) continue;
+
+                EnsureSafeParentDirectories(installRoot, relativePath);
+                var backupPath = GameVerifier.ResolvePath(backup, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(backupPath)!);
+                File.Move(destination, backupPath, true);
+                committed.Add((destination, backupPath));
+            }
+
+            SaveManagedFiles(installRoot, manifest.Version, expectedPaths);
+
+            logger.Info($"Applied {invalid.Count} game files and removed {obsolete.Length} obsolete managed files for version {manifest.Version}");
+            if (package is not null)
+            {
+                progress?.Report(new OperationProgress(package.FileName, package.Size, package.Size,
+                    package.Size, package.Size, package.Size / Math.Max(clock.Elapsed.TotalSeconds, 0.1)));
+            }
+            return invalid.Count + obsolete.Length;
         }
         catch (Exception operationError)
         {
@@ -138,6 +180,87 @@ public sealed class GameInstaller(IDistributionService distribution, GameVerifie
         if (package.Size <= 0) throw new InvalidDataException("The game package must declare its exact positive size.");
         if (package.Sha256.Length != 64 || !package.Sha256.All(Uri.IsHexDigit))
             throw new InvalidDataException("The game package must declare a valid SHA-256 hash.");
+    }
+
+    private IReadOnlyList<string> GetManagedFiles(string root)
+    {
+        var recordPath = Path.Combine(root, ManagedFilesName);
+        if (!File.Exists(recordPath)) return [];
+        try
+        {
+            var record = JsonSerializer.Deserialize<ManagedInstallationRecord>(File.ReadAllText(recordPath), JsonOptions);
+            return record?.Files
+                .Where(GitHubDistributionService.IsSafeRelativePath)
+                .Select(NormalizePath)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray() ?? [];
+        }
+        catch (Exception ex)
+        {
+            logger.Error("Could not read the managed game file inventory; it will be rebuilt without removing unknown files", ex);
+            return [];
+        }
+    }
+
+    private static HashSet<string> GetManifestPaths(GameManifest manifest)
+    {
+        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in manifest.Files)
+        {
+            var normalized = NormalizePath(file.Path);
+            if (!GitHubDistributionService.IsSafeRelativePath(normalized) || !paths.Add(normalized))
+                throw new InvalidDataException($"Manifest contains an unsafe or duplicate path: {file.Path}");
+        }
+        return paths;
+    }
+
+    private static void SaveManagedFiles(string root, string version, IEnumerable<string> files)
+    {
+        var recordPath = Path.Combine(root, ManagedFilesName);
+        var temporaryPath = recordPath + ".new-" + Guid.NewGuid().ToString("N");
+        var record = new ManagedInstallationRecord
+        {
+            Version = version,
+            Files = files.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToList()
+        };
+        try
+        {
+            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(record, JsonOptions));
+            File.Move(temporaryPath, recordPath, true);
+        }
+        finally
+        {
+            try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); }
+            catch { }
+        }
+    }
+
+    private void CleanStaleOperations(string root)
+    {
+        try
+        {
+            var cutoff = DateTime.UtcNow.AddHours(-6);
+            foreach (var path in Directory.EnumerateDirectories(root, ".ubf-staging-*", SearchOption.TopDirectoryOnly))
+            {
+                var info = new DirectoryInfo(path);
+                var suffix = info.Name[".ubf-staging-".Length..];
+                if (!Guid.TryParseExact(suffix, "N", out _) || info.LastWriteTimeUtc > cutoff ||
+                    (info.Attributes & FileAttributes.ReparsePoint) != 0)
+                    continue;
+                Directory.Delete(info.FullName, true);
+                logger.Info($"Removed stale UBF staging directory {info.FullName}");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Error("Could not clean stale UBF staging directories", ex);
+        }
+    }
+
+    private sealed class ManagedInstallationRecord
+    {
+        public string Version { get; set; } = "";
+        public List<string> Files { get; set; } = [];
     }
 
     private static async Task ExtractPackageSafelyAsync(string archivePath, string destinationRoot, GameManifest manifest,

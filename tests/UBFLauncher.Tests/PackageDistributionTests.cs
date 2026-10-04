@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Net;
 using System.Security.Cryptography;
 using System.Collections;
 using System.Resources;
@@ -130,6 +131,55 @@ public sealed class PackageDistributionTests
             Assert.Equal("REPARAR", viewModel.PrimaryAction);
             return true;
         });
+    }
+
+    [Fact]
+    public async Task UpdatingRemovesOnlyPreviouslyManagedObsoleteFiles()
+    {
+        using var temp = new TemporaryDirectory();
+        var root = Path.Combine(temp.Path, "game");
+        var firstFiles = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["UBF.exe"] = [1, 2, 3],
+            ["Content/Legacy.pak"] = [4, 5, 6]
+        };
+        var firstArchive = CreateZip(firstFiles);
+        await CreateInstaller(temp.Path, firstArchive).InstallOrRepairAsync(root, CreateManifest(firstArchive, firstFiles), null);
+
+        var playerSave = Path.Combine(root, "Saved", "player.sav");
+        Directory.CreateDirectory(Path.GetDirectoryName(playerSave)!);
+        await File.WriteAllTextAsync(playerSave, "keep this player data");
+
+        var nextFiles = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["UBF.exe"] = [7, 8, 9],
+            ["Content/Current.pak"] = [10, 11, 12]
+        };
+        var nextArchive = CreateZip(nextFiles);
+        var nextManifest = CreateManifest(nextArchive, nextFiles);
+        var installer = CreateInstaller(temp.Path, nextArchive);
+
+        Assert.Equal(3, await installer.InstallOrRepairAsync(root, nextManifest, null));
+        Assert.False(File.Exists(Path.Combine(root, "Content", "Legacy.pak")));
+        Assert.Equal(nextFiles["UBF.exe"], await File.ReadAllBytesAsync(Path.Combine(root, "UBF.exe")));
+        Assert.Equal(nextFiles["Content/Current.pak"], await File.ReadAllBytesAsync(Path.Combine(root, "Content", "Current.pak")));
+        Assert.Equal("keep this player data", await File.ReadAllTextAsync(playerSave));
+        Assert.Equal(0, installer.GetPendingCleanupCount(root, nextManifest));
+    }
+
+    [Fact]
+    public async Task DownloadClosesTheTemporaryFileBeforeReplacingDestination()
+    {
+        using var temp = new TemporaryDirectory();
+        var destination = Path.Combine(temp.Path, "UBFLauncher-update.zip");
+        var expected = new byte[] { 19, 23, 29, 31 };
+        var logger = new Logger(Path.Combine(temp.Path, "download.log"));
+        var service = new GitHubDistributionService(new LauncherConfig(), logger, new StaticHttpMessageHandler(expected));
+
+        await service.DownloadAsync(new Uri("https://updates.example.invalid/UBFLauncher-update.zip"), destination, null);
+
+        Assert.Equal(expected, await File.ReadAllBytesAsync(destination));
+        Assert.Empty(Directory.EnumerateFiles(temp.Path, "*.download-*"));
     }
 
     [Fact]
@@ -449,6 +499,18 @@ public sealed class PackageDistributionTests
 
         public Task DownloadAsync(Uri uri, string destination, IProgress<(long Received, long Total)>? progress,
             CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    }
+
+    private sealed class StaticHttpMessageHandler(byte[] payload) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(payload)
+            };
+            return Task.FromResult(response);
+        }
     }
 
     private sealed class TemporaryDirectory : IDisposable

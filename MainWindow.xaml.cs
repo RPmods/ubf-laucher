@@ -54,15 +54,24 @@ public partial class MainWindow : Window
         LoadLogo();
         BuildSocialLinks();
         await _viewModel.InitializeAsync();
-        _showingUserPanel = true;
-        UserPanel.Visibility = Visibility.Visible;
-        UserNameInput.Focus();
-        UserNameInput.SelectAll();
         BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(850))
         {
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
         });
-        AnimateUserIn();
+        if (_viewModel.HasUserName)
+        {
+            _showingUserPanel = false;
+            GamePanel.Visibility = Visibility.Visible;
+            AnimateGameIn();
+        }
+        else
+        {
+            _showingUserPanel = true;
+            UserPanel.Visibility = Visibility.Visible;
+            UserNameInput.Focus();
+            UserNameInput.SelectAll();
+            AnimateUserIn();
+        }
     }
 
     private void LoadBackgroundVideo()
@@ -103,10 +112,10 @@ public partial class MainWindow : Window
                 ToolTip = validUrl
                     ? (name == "Twitch" ? "twitch.tv/rodrigorpmods" : uri!.Host)
                     : $"Configura el enlace de {name} en launcher.settings.json",
-                Width = name switch { "YouTube" or "Twitch" => 96, "Discord" => 90, "TikTok" => 84, _ => 68 },
+                Width = 32,
                 Height = 32,
-                Padding = new Thickness(5, 2, 5, 2),
-                Margin = new Thickness(0, 0, 5, 0),
+                Padding = new Thickness(0),
+                Margin = new Thickness(0, 0, 6, 0),
                 IsEnabled = validUrl,
                 Style = (Style)FindResource("QuietButton")
             };
@@ -116,27 +125,13 @@ public partial class MainWindow : Window
             button.FontSize = 10;
             button.FontWeight = FontWeights.SemiBold;
 
-            var content = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            content.Children.Add(new System.Windows.Controls.Image
+            button.Content = new System.Windows.Controls.Image
             {
                 Source = (System.Windows.Media.ImageSource)FindResource($"{name}Mark"),
-                Width = 17,
-                Height = 17,
-                Stretch = System.Windows.Media.Stretch.Uniform,
-                Margin = new Thickness(0, 0, 6, 0)
-            });
-            content.Children.Add(new TextBlock
-            {
-                Text = name.ToUpperInvariant(),
-                VerticalAlignment = VerticalAlignment.Center,
-                FontWeight = FontWeights.SemiBold
-            });
-            button.Content = content;
+                Width = 16,
+                Height = 16,
+                Stretch = System.Windows.Media.Stretch.Uniform
+            };
             button.SetValue(System.Windows.Automation.AutomationProperties.NameProperty, $"Abrir {name}");
 
             if (validUrl) button.Click += (_, _) => OpenSocialLink(url!);
@@ -151,6 +146,8 @@ public partial class MainWindow : Window
         ContinueButton.Content = UiText.Get(language, "continue");
         UsernameHint.Text = UiText.Get(language, "username_saved");
         GameSectionLabel.Text = UiText.Get(language, "game_section");
+        InstalledVersionLabel.Text = UiText.Get(language, "installed_version");
+        AvailableVersionLabel.Text = UiText.Get(language, "available_version");
         VerifyButton.Content = UiText.Get(language, "verify");
         FolderButton.Content = UiText.Get(language, "folder");
         ChangeUserButton.Content = UiText.Get(language, "user");
@@ -159,7 +156,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.11";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.12";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
@@ -183,7 +180,7 @@ public partial class MainWindow : Window
         var saved = settings.ShowDialog() == true;
         if (!previousLanguage.Equals(_config.Language, StringComparison.OrdinalIgnoreCase)) ApplyLanguage();
         if (saved && !previousInstallDirectory.Equals(_config.InstallDirectory, StringComparison.OrdinalIgnoreCase))
-            _ = _viewModel.CheckGamePresenceAsync();
+            _ = _viewModel.RefreshUpdatesAsync();
         LauncherUpdateButton.Visibility = _viewModel.LauncherUpdateAvailable ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -205,7 +202,7 @@ public partial class MainWindow : Window
         BackgroundOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(520)));
         GamePanel.Visibility = Visibility.Visible;
         AnimateGameIn();
-        await _viewModel.CheckGamePresenceAsync();
+        await _viewModel.RefreshUpdatesAsync();
     }
 
     private async void Primary_Click(object sender, RoutedEventArgs e)
@@ -234,7 +231,7 @@ public partial class MainWindow : Window
                 await StartGameProcessAsync();
                 break;
             case LauncherState.Error:
-                await _viewModel.CheckGamePresenceAsync();
+                await _viewModel.RetryLastOperationAsync();
                 break;
         }
     }
@@ -263,7 +260,7 @@ public partial class MainWindow : Window
         {
             _config.InstallDirectory = dialog.FolderName;
             ConfigurationService.Save(_config, _logger);
-            _ = _viewModel.CheckGamePresenceAsync();
+            _ = _viewModel.RefreshUpdatesAsync();
         }
     }
 

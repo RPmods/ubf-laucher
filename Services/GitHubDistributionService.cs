@@ -8,15 +8,17 @@ namespace UBFLauncher.Services;
 public sealed class GitHubDistributionService : IDistributionService
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
-    private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(30) };
+    private readonly HttpClient _http;
     private readonly LauncherConfig _config;
     private readonly Logger _logger;
     private readonly Dictionary<string, string> _branches = new(StringComparer.OrdinalIgnoreCase);
 
-    public GitHubDistributionService(LauncherConfig config, Logger logger)
+    public GitHubDistributionService(LauncherConfig config, Logger logger, HttpMessageHandler? handler = null)
     {
         _config = config;
         _logger = logger;
+        _http = handler is null ? new HttpClient() : new HttpClient(handler, disposeHandler: true);
+        _http.Timeout = TimeSpan.FromMinutes(30);
         _http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UBFLauncher", "1.0"));
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
     }
@@ -92,25 +94,52 @@ public sealed class GitHubDistributionService : IDistributionService
             using var response = await _http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
             var total = response.Content.Headers.ContentLength ?? -1;
-            await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
-            await using var output = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None, 128 * 1024, true);
-            var buffer = new byte[128 * 1024];
-            long received = 0;
-            int read;
-            while ((read = await input.ReadAsync(buffer, cancellationToken)) > 0)
             {
-                await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-                received += read;
-                progress?.Report((received, total));
+                await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
+                await using var output = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None, 128 * 1024, true);
+                var buffer = new byte[128 * 1024];
+                long received = 0;
+                int read;
+                while ((read = await input.ReadAsync(buffer, cancellationToken)) > 0)
+                {
+                    await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                    received += read;
+                    progress?.Report((received, total));
+                }
+                await output.FlushAsync(cancellationToken);
             }
-            await output.FlushAsync(cancellationToken);
-            File.Move(temp, destination, true);
+
+            // The file stream above must be closed before this atomic replacement. On Windows,
+            // attempting the move while FileShare.None is still active reports the file as locked.
+            await MoveIntoPlaceAsync(temp, destination, cancellationToken);
+            if (!File.Exists(destination)) throw new IOException("The downloaded file could not be placed in its destination.");
         }
         catch
         {
             TryDelete(temp);
             throw;
         }
+    }
+
+    private static async Task MoveIntoPlaceAsync(string source, string destination, CancellationToken cancellationToken)
+    {
+        IOException? lastError = null;
+        for (var attempt = 0; attempt < 4; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                File.Move(source, destination, true);
+                return;
+            }
+            catch (IOException ex) when (attempt < 3)
+            {
+                lastError = ex;
+                await Task.Delay(TimeSpan.FromMilliseconds(120 * (attempt + 1)), cancellationToken);
+            }
+        }
+
+        throw lastError ?? new IOException("Could not replace the downloaded file.");
     }
 
     private async Task<Uri> RawFileUrlAsync(string repository, string path, CancellationToken cancellationToken)

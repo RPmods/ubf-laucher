@@ -43,6 +43,23 @@ Copy-Item -LiteralPath $updaterExe -Destination (Join-Path $launcherOutput 'UBFL
 $debugSymbols = @(Get-ChildItem -LiteralPath $launcherOutput -Filter '*.pdb' -Recurse -File)
 $debugSymbols | Remove-Item -Force
 
+$launcherVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($launcherExe).ProductVersion
+$managedFileManifest = Join-Path $launcherOutput 'UBFLauncher.files.json'
+$managedFiles = @(
+    Get-ChildItem -LiteralPath $launcherOutput -Recurse -File |
+        ForEach-Object { [IO.Path]::GetRelativePath($launcherOutput, $_.FullName).Replace('\', '/') }
+)
+$managedFiles += 'UBFLauncher.files.json'
+$managedPayload = [ordered]@{
+    version = $launcherVersion
+    files = @($managedFiles | Sort-Object -Unique)
+}
+[IO.File]::WriteAllText(
+    $managedFileManifest,
+    ($managedPayload | ConvertTo-Json -Depth 3),
+    [Text.UTF8Encoding]::new($false)
+)
+
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::CreateFromDirectory(
     $launcherOutput,
@@ -52,7 +69,6 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 )
 
 $archiveInfo = Get-Item -LiteralPath $archive
-$launcherVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($launcherExe).ProductVersion
 $archiveHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
 Write-Host "Launcher version: $launcherVersion"
 Write-Host "Launcher publish: $launcherOutput"

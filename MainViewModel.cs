@@ -25,6 +25,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private bool _busy;
     private bool _launcherUpdateAvailable;
     private string _currentFile = "";
+    private string _availableGameVersion = "";
+    private string _availableLauncherVersion = "";
+    private RetryOperation _retryOperation = RetryOperation.Verify;
     private GameManifest? _manifest;
     private IReadOnlyList<GameFile> _invalidFiles = [];
     private string _language;
@@ -55,16 +58,17 @@ public sealed class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsReady));
             OnPropertyChanged(nameof(CanUsePrimaryAction));
             OnPropertyChanged(nameof(CanVerify));
+            OnPropertyChanged(nameof(IsProgressIndeterminate));
         }
     }
     public string Status { get => _status; private set { _status = value; OnPropertyChanged(); } }
     public string Details { get => _details; private set { _details = value; OnPropertyChanged(); } }
     public string UserName { get => _userName; set { _userName = value; OnPropertyChanged(); } }
-    public string CurrentFile { get => _currentFile; private set { _currentFile = value; OnPropertyChanged(); } }
+    public string CurrentFile { get => _currentFile; private set { _currentFile = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsProgressIndeterminate)); } }
     public double Progress { get => _progress; private set { _progress = value; OnPropertyChanged(); } }
     public string ProgressText { get => _progressText; private set { _progressText = value; OnPropertyChanged(); } }
-    public bool IsBusy { get => _busy; private set { _busy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanUsePrimaryAction)); OnPropertyChanged(nameof(CanVerify)); } }
-    public bool LauncherUpdateAvailable { get => _launcherUpdateAvailable; private set { _launcherUpdateAvailable = value; OnPropertyChanged(); } }
+    public bool IsBusy { get => _busy; private set { _busy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanUsePrimaryAction)); OnPropertyChanged(nameof(CanVerify)); OnPropertyChanged(nameof(ShowOperationProgress)); OnPropertyChanged(nameof(IsProgressIndeterminate)); } }
+    public bool LauncherUpdateAvailable { get => _launcherUpdateAvailable; private set { _launcherUpdateAvailable = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasLauncherUpdate)); } }
     public bool IsReady => State == LauncherState.ReadyToPlay;
     public bool CanUsePrimaryAction => !IsBusy && State != LauncherState.Launching;
     public bool CanVerify => !IsBusy && State != LauncherState.Launching;
@@ -83,13 +87,36 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public string InstallDirectory => _config.InstallDirectory;
     public IReadOnlyDictionary<string, string> SocialLinks => _config.SocialLinks;
     public double MusicVolume => _audio.Volume;
+    public bool ShowOperationProgress => IsBusy;
+    public bool IsProgressIndeterminate => IsBusy && State == LauncherState.Verifying && string.IsNullOrWhiteSpace(CurrentFile);
+    public string InstalledGameVersion => HasLocalGameExecutable
+        ? string.IsNullOrWhiteSpace(_config.InstalledGameVersion) ? UiText.Get(_language, "version_unknown") : _config.InstalledGameVersion
+        : UiText.Get(_language, "version_not_installed");
+    public string AvailableGameVersion => _availableGameVersion;
+    public bool HasGameUpdate => !string.IsNullOrWhiteSpace(_availableGameVersion) &&
+        (!HasLocalGameExecutable || !string.Equals(_availableGameVersion, _config.InstalledGameVersion, StringComparison.OrdinalIgnoreCase));
+    public string LauncherInstalledVersion => GetCurrentLauncherVersion();
+    public string AvailableLauncherVersion => _availableLauncherVersion;
+    public bool HasLauncherUpdate => LauncherUpdateAvailable && !string.IsNullOrWhiteSpace(_availableLauncherVersion);
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
-        State = LauncherState.EnteringUsername;
-        Status = UiText.Get(_language, "welcome");
-        _ = CheckLauncherUpdateAsync(true);
-        await Task.CompletedTask;
+        if (!HasUserName)
+        {
+            State = LauncherState.EnteringUsername;
+            Status = UiText.Get(_language, "welcome");
+            _ = CheckLauncherUpdateAsync();
+            return Task.CompletedTask;
+        }
+
+        _ = RefreshUpdatesAsync();
+        return Task.CompletedTask;
+    }
+
+    public async Task RefreshUpdatesAsync()
+    {
+        await VerifyGameAsync();
+        await CheckLauncherUpdateAsync(allowAutoInstall: true);
     }
 
     public bool SaveUserName()
@@ -126,12 +153,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 State = LauncherState.NotInstalled;
                 Status = UiText.Get(_language, "not_installed");
                 Details = UiText.Get(_language, "install_hint");
+                RefreshVersionProperties();
                 return;
             }
             State = LauncherState.ReadyToPlay;
             Status = UiText.Get(_language, "ready");
             Details = "";
             Details = GetLocalGameDetails();
+            RefreshVersionProperties();
         }
         catch (Exception ex) { HandleError(UiText.Get(_language, "error_check_install"), ex); }
     }
@@ -140,6 +169,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         if (IsBusy) return;
         IsBusy = true;
+        _retryOperation = RetryOperation.Verify;
         try
         {
             State = LauncherState.Verifying;
@@ -148,6 +178,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             Progress = 0;
             ProgressText = "";
             _manifest = await _distribution.GetGameManifestAsync();
+            SetAvailableGameVersion(_manifest.Version);
             var verifyProgress = new Progress<(string FileName, int Checked, int Total)>(value =>
             {
                 CurrentFile = value.FileName;
@@ -155,19 +186,21 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 ProgressText = UiText.Get(_language, "verify_count", value.Checked, value.Total);
             });
             _invalidFiles = await _verifier.FindInvalidFilesAsync(_config.InstallDirectory, _manifest, verifyProgress);
-            if (_invalidFiles.Count > 0)
+            var cleanupCount = _installer.GetPendingCleanupCount(_config.InstallDirectory, _manifest);
+            var pendingFiles = _invalidFiles.Count + cleanupCount;
+            if (pendingFiles > 0)
             {
                 if (!string.Equals(_manifest.Version, _config.InstalledGameVersion, StringComparison.OrdinalIgnoreCase))
                 {
                     State = LauncherState.Updating;
                     Status = UiText.Get(_language, "update_available");
-                    Details = UiText.Get(_language, "update_count", _manifest.Version, _invalidFiles.Count);
+                    Details = UiText.Get(_language, "update_count", _manifest.Version, pendingFiles);
                 }
                 else
                 {
                     State = LauncherState.Repairing;
                     Status = UiText.Get(_language, "repair_needed");
-                    Details = UiText.Get(_language, "repair_count", _invalidFiles.Count);
+                    Details = UiText.Get(_language, "repair_count", pendingFiles);
                 }
             }
             else
@@ -178,6 +211,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 Status = UiText.Get(_language, "ready");
                 Details = "";
                 Details = UiText.Get(_language, "game_version", _manifest.Version);
+                RefreshVersionProperties();
             }
         }
         catch (ReleaseNotPublishedException ex) { HandleReleaseNotPublished(ex); }
@@ -208,9 +242,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
             return;
         }
         IsBusy = true;
+        _retryOperation = RetryOperation.Install;
         try
         {
             _manifest = await _distribution.GetGameManifestAsync();
+            SetAvailableGameVersion(_manifest.Version);
             var updating = File.Exists(Path.Combine(_config.InstallDirectory, _config.GameExecutableName))
                 && !_manifest.Version.Equals(_config.InstalledGameVersion, StringComparison.OrdinalIgnoreCase);
             State = updating ? LauncherState.Updating : State == LauncherState.NotInstalled ? LauncherState.Downloading : LauncherState.Repairing;
@@ -239,11 +275,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
             Details = UiText.Get(_language, "game_version", _manifest.Version);
             Progress = 100;
             ProgressText = UiText.Get(_language, "install_verified");
+            RefreshVersionProperties();
         }
         catch (ReleaseNotPublishedException ex) { HandleReleaseNotPublished(ex); }
         catch (Exception ex) { HandleRemoteGameOperationError(UiText.Get(_language, "error_install"), ex); }
         finally { IsBusy = false; }
     }
+
+    public Task RetryLastOperationAsync() => _retryOperation == RetryOperation.Install
+        ? InstallOrUpdateGameAsync()
+        : VerifyGameAsync();
 
     public Process? LaunchGame()
     {
@@ -326,9 +367,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             var remote = await _distribution.GetLauncherVersionAsync(timeout.Token);
-            if (remote is null) return "launcher_no_metadata";
-            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.11";
+            if (remote is null)
+            {
+                SetAvailableLauncherVersion("");
+                return "launcher_no_metadata";
+            }
+            var current = GetCurrentLauncherVersion();
             LauncherUpdateAvailable = VersionUtility.IsNewer(remote.Version, current);
+            SetAvailableLauncherVersion(LauncherUpdateAvailable ? remote.Version : "");
             if (LauncherUpdateAvailable) _logger.Info($"Launcher update available: {remote.Version}");
             OnPropertyChanged(nameof(PrimaryAction));
             if (!LauncherUpdateAvailable) return "launcher_current";
@@ -350,7 +396,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         try
         {
             var remote = await _distribution.GetLauncherVersionAsync() ?? throw new InvalidDataException("No launcher release metadata is available.");
-            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.11")) { LauncherUpdateAvailable = false; return; }
+            if (!VersionUtility.IsNewer(remote.Version, GetCurrentLauncherVersion())) { LauncherUpdateAvailable = false; SetAvailableLauncherVersion(""); return; }
             var installedUpdater = Path.Combine(AppContext.BaseDirectory, "UBFLauncherUpdater.exe");
             if (!File.Exists(installedUpdater)) throw new FileNotFoundException("The launcher updater is not installed beside the launcher.", installedUpdater);
             updateTemp = Path.Combine(Path.GetTempPath(), "UBFLauncherUpdate", Guid.NewGuid().ToString("N"));
@@ -360,7 +406,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var archive = Path.Combine(updateTemp, "launcher-update.zip");
             Status = UiText.Get(_language, "launcher_downloading");
             Details = UiText.Get(_language, "launcher_version", remote.Version);
-            await _distribution.DownloadAsync(new Uri(remote.DownloadUrl), archive, null);
+            Progress = 0;
+            ProgressText = UiText.Get(_language, "calculating_download");
+            var downloadProgress = new Progress<(long Received, long Total)>(value =>
+            {
+                var total = value.Total > 0 ? value.Total : Math.Max(value.Received, 1);
+                Progress = value.Received * 100d / total;
+                ProgressText = UiText.Get(_language, "download_progress", Math.Round(Progress), FormatBytes(value.Received),
+                    FormatBytes(Math.Max(0, total - value.Received)), "—");
+            });
+            await _distribution.DownloadAsync(new Uri(remote.DownloadUrl), archive, downloadProgress);
             await using (var stream = File.OpenRead(archive))
             {
                 var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream));
@@ -424,6 +479,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             _ => null
         };
         if (detailsKey is not null) Details = UiText.Get(_language, detailsKey);
+        RefreshVersionProperties();
         OnPropertyChanged(nameof(PrimaryAction));
     }
 
@@ -475,19 +531,39 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     private void HandleRemoteGameOperationError(string message, Exception ex)
     {
-        if (!HasLocalGameExecutable)
-        {
-            HandleError(message, ex);
-            return;
-        }
-
-        _logger.Error(message, ex);
-        State = LauncherState.ReadyToPlay;
-        Status = message;
-        var errorDetails = ex is InvalidDataException ? ex.Message : UiText.Get(_language, "retry_check");
-        Details = errorDetails + " " + UiText.Get(_language, "local_play_available");
-        ProgressText = "";
+        HandleError(message, ex);
+        if (HasLocalGameExecutable)
+            Details += " " + UiText.Get(_language, "previous_installation_kept");
+        RefreshVersionProperties();
     }
+
+    private void SetAvailableGameVersion(string version)
+    {
+        _availableGameVersion = version;
+        OnPropertyChanged(nameof(AvailableGameVersion));
+        OnPropertyChanged(nameof(HasGameUpdate));
+    }
+
+    private void SetAvailableLauncherVersion(string version)
+    {
+        _availableLauncherVersion = version;
+        OnPropertyChanged(nameof(AvailableLauncherVersion));
+        OnPropertyChanged(nameof(HasLauncherUpdate));
+    }
+
+    private void RefreshVersionProperties()
+    {
+        OnPropertyChanged(nameof(InstalledGameVersion));
+        OnPropertyChanged(nameof(AvailableGameVersion));
+        OnPropertyChanged(nameof(HasGameUpdate));
+        OnPropertyChanged(nameof(LauncherInstalledVersion));
+        OnPropertyChanged(nameof(AvailableLauncherVersion));
+        OnPropertyChanged(nameof(HasLauncherUpdate));
+    }
+
+    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.12";
+
+    private enum RetryOperation { Verify, Install }
 
     private static string FormatBytes(long value)
     {
