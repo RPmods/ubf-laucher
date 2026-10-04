@@ -41,24 +41,20 @@
             </StackPanel>
         </Grid>
 
-        <Grid Margin="42,72,42,84">
+        <Grid Margin="56,76,56,82">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="330" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Border x:Name="UserPanel" Grid.Column="0" Background="#D9101418" BorderBrush="#80F34255" BorderThickness="1"
-                    CornerRadius="16" Padding="30" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0.5,0.5">
-                <Border.Effect>
-                    <DropShadowEffect Color="#FF000000" BlurRadius="28" ShadowDepth="12" Direction="315" Opacity="0.32" />
-                </Border.Effect>
+            <Border x:Name="UserPanel" Grid.Column="0" Padding="4,0,28,0" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0.5,0.5">
                 <Border.RenderTransform><TranslateTransform x:Name="UserTransform" X="-65" /></Border.RenderTransform>
                 <StackPanel>
-                    <TextBlock Text="UBF" Foreground="{StaticResource AccentBrush}" FontSize="16" FontWeight="Bold" />
-                    <TextBlock x:Name="WelcomeTitle" Text="Bienvenido" Foreground="White" FontSize="30" FontWeight="SemiBold" Margin="0,22,0,8" />
+                    <TextBlock Text="TU PERFIL" Foreground="{StaticResource AccentBrush}" FontSize="11" FontWeight="Bold" />
+                    <TextBlock x:Name="WelcomeTitle" Text="Bienvenido" Foreground="White" FontSize="34" FontWeight="SemiBold" Margin="0,16,0,8" />
                     <TextBlock x:Name="UsernameLabel" Text="Nombre de usuario" Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,0,0,10" />
                     <TextBox x:Name="UserNameInput" Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}"
                              Height="46" Padding="12,10" FontSize="16" Foreground="White" CaretBrush="White"
-                             Background="#55232B31" BorderBrush="#557C8A8A" BorderThickness="1"
+                             Background="#6611161A" BorderBrush="#66849199" BorderThickness="1"
                              KeyDown="UserNameInput_KeyDown" />
                     <TextBlock x:Name="NameError" Foreground="#FFFF8B82" FontSize="12" Margin="0,8,0,0" />
                     <Button x:Name="ContinueButton" Content="CONTINUAR" Style="{StaticResource PrimaryButton}" Margin="0,22,0,0" HorizontalAlignment="Stretch" Click="Continue_Click" />
@@ -66,42 +62,42 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" Margin="10,18,0,18" CornerRadius="18" Background="#B810151A" BorderBrush="#337C8A8A" BorderThickness="1" Padding="28" Panel.ZIndex="0">
-                <Border.Effect>
-                    <DropShadowEffect Color="#FF000000" BlurRadius="30" ShadowDepth="10" Direction="315" Opacity="0.25" />
-                </Border.Effect>
-            </Border>
-            <Grid x:Name="GamePanel" Grid.Column="1" Margin="10,0,0,0" Opacity="0" Visibility="Collapsed" RenderTransformOrigin="0.5,0.5" Panel.ZIndex="1">
+            <Grid x:Name="GamePanel" Grid.Column="1" Margin="48,0,0,0" Opacity="0" Visibility="Collapsed" RenderTransformOrigin="0.5,0.5">
                 <Grid.RenderTransform><TranslateTransform x:Name="GameTransform" X="34" /></Grid.RenderTransform>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Width="460">
-                    <Image x:Name="GameLogo" Source="" MaxHeight="165" MaxWidth="470" Stretch="Uniform"
-                           HorizontalAlignment="Right" Visibility="Collapsed" />
-                    <TextBlock x:Name="Wordmark" Text="UBF" Foreground="White" FontSize="86" FontWeight="Black" TextAlignment="Right" />
-                    <Border Width="66" Height="3" Background="{StaticResource AccentBrush}" HorizontalAlignment="Right" Margin="0,8,0,22" />
-                    <TextBlock x:Name="GameSectionLabel" Text="EL JUEGO" Foreground="#FFFF7581" FontSize="12" FontWeight="SemiBold" TextAlignment="Right" />
-                    <Border x:Name="StatusCard" Background="#38151B21" BorderBrush="#3D859295" BorderThickness="1" CornerRadius="12" Padding="16,13" Margin="0,8,0,0">
-                        <StackPanel>
-                            <TextBlock Text="ESTADO DE LA INSTALACIÓN" Foreground="#FFB7C3C7" FontSize="10" FontWeight="SemiBold" TextAlignment="Right" />
-                            <TextBlock Text="{Binding Status}" Foreground="White" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Right" Margin="0,5,0,0" />
-                            <TextBlock Text="{Binding Details}" Foreground="#FFE4C5C9" FontSize="14" TextWrapping="Wrap" TextAlignment="Right" Margin="0,5,0,0" />
-                            <ProgressBar Height="4" Margin="0,16,0,8" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"
-                                         Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                         Foreground="{StaticResource AccentBrush}" Background="#664B252C" />
-                            <TextBlock Text="{Binding CurrentFile}" Foreground="#FFE4C5C9" FontSize="12" TextTrimming="CharacterEllipsis" TextAlignment="Right"
-                                       Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <TextBlock Text="{Binding ProgressText}" Foreground="#FFE4C5C9" FontSize="12" Margin="0,4,0,0" TextAlignment="Right"
-                                       Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </StackPanel>
-                    </Border>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1" />
+                    <ColumnDefinition Width="250" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,44,0">
+                    <TextBlock x:Name="GameSectionLabel" Text="EL JUEGO" Foreground="#FFFF7581" FontSize="12" FontWeight="SemiBold" />
+                    <Image x:Name="GameLogo" Source="" MaxHeight="125" MaxWidth="440" Stretch="Uniform"
+                           HorizontalAlignment="Left" Margin="0,14,0,6" Visibility="Collapsed" />
+                    <TextBlock x:Name="Wordmark" Text="UBF" Foreground="White" FontSize="96" FontWeight="Black" Margin="-5,2,0,0" />
+                    <Border Width="54" Height="3" Background="{StaticResource AccentBrush}" HorizontalAlignment="Left" Margin="0,4,0,24" />
+                    <TextBlock Text="{Binding Status}" Foreground="White" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Details}" Foreground="#FFD0D7D9" FontSize="14" TextWrapping="Wrap" Margin="0,7,0,0" />
+                    <ProgressBar Height="3" MaxWidth="430" HorizontalAlignment="Left" Margin="0,18,0,8" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}"
+                                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 Foreground="{StaticResource AccentBrush}" Background="#66717A80" />
+                    <TextBlock Text="{Binding CurrentFile}" Foreground="#FFB9C2C5" FontSize="12" TextTrimming="CharacterEllipsis"
+                               Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Text="{Binding ProgressText}" Foreground="#FFB9C2C5" FontSize="12" Margin="0,4,0,0"
+                               Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
+                <Border Grid.Column="1" Width="1" Height="210" Background="#66849199" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="30,0,0,0">
+                    <TextBlock Text="UBF  /  JUEGO" Foreground="#FFB9C2C5" FontSize="11" FontWeight="SemiBold" />
                     <Button x:Name="PrimaryButton" Content="{Binding PrimaryAction}" IsEnabled="{Binding CanUsePrimaryAction}" Style="{StaticResource PrimaryButton}"
-                            Width="245" Height="58" HorizontalAlignment="Right" Margin="0,28,0,0" Click="Primary_Click" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                            Width="220" Height="58" HorizontalAlignment="Stretch" Margin="0,16,0,0" Click="Primary_Click" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="-10,16,0,0">
                         <Button x:Name="VerifyButton" Content="VERIFICAR" IsEnabled="{Binding CanVerify}" Style="{StaticResource QuietButton}" Click="Verify_Click" />
-                        <Button x:Name="FolderButton" Content="CARPETA" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="ChangeFolder_Click" />
-                        <Button x:Name="ChangeUserButton" Content="USUARIO" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="ChangeUser_Click" />
+                        <Button x:Name="FolderButton" Content="CARPETA" Style="{StaticResource QuietButton}" Margin="3,0,0,0" Click="ChangeFolder_Click" />
                     </StackPanel>
+                    <Button x:Name="ChangeUserButton" Content="USUARIO" Style="{StaticResource QuietButton}"
+                            HorizontalAlignment="Left" Margin="-10,3,0,0" Click="ChangeUser_Click" />
                     <Button x:Name="LauncherUpdateButton" Content="ACTUALIZAR LAUNCHER" Style="{StaticResource QuietButton}"
-                            HorizontalAlignment="Right" Margin="0,12,0,0" Visibility="Collapsed" Click="LauncherUpdate_Click" />
+                            HorizontalAlignment="Left" Margin="-10,8,0,0" Visibility="Collapsed" Click="LauncherUpdate_Click" />
                 </StackPanel>
             </Grid>
         </Grid>
@@ -149,7 +145,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="UBF  /  LAUNCHER" Foreground="White" FontSize="11" FontWeight="Bold" />
-                    <TextBlock x:Name="LauncherBadge" Text="GAME DISTRIBUTION  ·  V1.0.9" Foreground="#FFD4C6E5" FontSize="9" Margin="0,3,0,0" />
+                    <TextBlock x:Name="LauncherBadge" Text="V1.0.10" Foreground="#FFB9C2C5" FontSize="9" Margin="0,3,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>

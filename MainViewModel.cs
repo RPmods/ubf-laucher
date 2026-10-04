@@ -327,7 +327,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             var remote = await _distribution.GetLauncherVersionAsync(timeout.Token);
             if (remote is null) return "launcher_no_metadata";
-            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.9";
+            var current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.10";
             LauncherUpdateAvailable = VersionUtility.IsNewer(remote.Version, current);
             if (LauncherUpdateAvailable) _logger.Info($"Launcher update available: {remote.Version}");
             OnPropertyChanged(nameof(PrimaryAction));
@@ -350,7 +350,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         try
         {
             var remote = await _distribution.GetLauncherVersionAsync() ?? throw new InvalidDataException("No launcher release metadata is available.");
-            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.9")) { LauncherUpdateAvailable = false; return; }
+            if (!VersionUtility.IsNewer(remote.Version, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.10")) { LauncherUpdateAvailable = false; return; }
             var installedUpdater = Path.Combine(AppContext.BaseDirectory, "UBFLauncherUpdater.exe");
             if (!File.Exists(installedUpdater)) throw new FileNotFoundException("The launcher updater is not installed beside the launcher.", installedUpdater);
             updateTemp = Path.Combine(Path.GetTempPath(), "UBFLauncherUpdate", Guid.NewGuid().ToString("N"));

@@ -5,14 +5,14 @@ Estado de esta revisión — 2026-10-03
 ------------------------------------
 
 - Juego UBF: Unreal Engine 5.8.2, versión 1.0.3-beta.
-- Launcher: WPF/.NET 8, versión independiente 1.0.9.
+- Launcher: WPF/.NET 8, versión independiente 1.0.10.
 - Repositorios separados: RPmods/ubf y RPmods/ubf-laucher.
 - Releases, tags, paquetes ZIP y metadata de actualización nunca se comparten entre productos.
 
 | Producto | Repositorio | Tag de Release | Archivo de distribución |
 |---|---|---|---|
 | Juego UBF | RPmods/ubf | `v1.0.3-beta` | `UBF-v1.0.3-beta.zip` |
-| UBFLauncher | RPmods/ubf-laucher | `launcher-v1.0.9` | `UBFLauncher-update.zip` |
+| UBFLauncher | RPmods/ubf-laucher | `launcher-v1.0.10` | `UBFLauncher-update.zip` |
 
 1. Contenido y arranque de UBF
 -----------------------------
@@ -72,7 +72,7 @@ El script lee la lista de archivos del ZIP y genera hashes solo para esos archiv
 
 - Al iniciar UBF, el reproductor del launcher pausa aunque el medio todavía esté abriéndose. Al cerrarse el juego, la música se reanuda.
 - El control de audio muestra un icono de altavoz, estado silenciado, deslizador y tooltip bilingüe.
-- Los botones sociales usan iconos vectoriales para Discord, YouTube, Twitch, TikTok y Web; los fondos llevan degradados y Twitch apunta a `twitch.tv/rodrigorpmods`.
+- Los botones sociales usan iconos vectoriales consistentes para Discord, YouTube, Twitch, TikTok y Web; Twitch apunta a `twitch.tv/rodrigorpmods`.
 - VERIFY solo lee el manifiesto y contrasta hashes; nunca descarga el ZIP. Si todo coincide, guarda la versión y deja el juego listo. Si hay diferencias, presenta `ACTUALIZAR` o `REPARAR`; el paquete se descarga solo cuando se confirma esa acción.
 - La raíz de instalación debe contener `UBF.exe`, `Engine/` y `UBF/`. No selecciones la carpeta `Binaries/Win64` del proyecto fuente: el launcher la detecta y evita verificar o descargar sobre ella.
 - JUGAR inicia el binario Shipping real `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`. Durante el arranque, el botón dice `INICIANDO...` y JUGAR/VERIFICAR se deshabilitan para evitar clics repetidos. El launcher sigue la ventana del juego hasta que se cierre.
@@ -81,7 +81,7 @@ El script lee la lista de archivos del ZIP y genera hashes solo para esos archiv
 5. Actualizar, compilar y probar UBFLauncher
 --------------------------------------------
 
-Cada cambio funcional requiere incrementar la versión del launcher en `UBFLauncher.csproj` y `app.manifest`. Revisa también los fallbacks de versión y `version.json.example`. Cambia `TargetGameVersion` únicamente cuando se publique una nueva versión del juego. Esta revisión publica UBFLauncher 1.0.9 y deja UBF en 1.0.3-beta.
+Cada cambio funcional requiere incrementar la versión del launcher en `UBFLauncher.csproj` y `app.manifest`. Revisa también los fallbacks de versión y `version.json.example`. Cambia `TargetGameVersion` únicamente cuando se publique una nueva versión del juego. Esta revisión publica UBFLauncher 1.0.10 y deja UBF en 1.0.3-beta. El diseño no usa un marco decorativo alrededor de todo el juego ni una tarjeta alrededor del estado; mantiene el título, estado/progreso y acciones en una distribución abierta con jerarquía clara.
 
 ```powershell
 dotnet build .\UBFLauncher.slnx -c Release
@@ -104,8 +104,8 @@ Después de probar el build actual:
 
 ```json
 {
-  "version": "1.0.9",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.9/UBFLauncher-update.zip",
+  "version": "1.0.10",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.10/UBFLauncher-update.zip",
   "sha256": "SHA256_REAL_DEL_ZIP",
   "releaseNotes": "Resumen de cambios"
 }

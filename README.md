@@ -12,7 +12,7 @@ Guía completa: [UBF_DISTRIBUTION_SETUP.txt](UBF_DISTRIBUTION_SETUP.txt).
 
 ## UBFLauncher
 
-Launcher 1.0.9 y juego 1.0.3-beta tienen versionado separado. El launcher se publica en RPmods/ubf-laucher con tag/Release y ZIP propios. `version.json` contiene la URL directa y SHA-256 del ZIP publicado; `version.json.example` es plantilla.
+Launcher 1.0.10 y juego 1.0.3-beta tienen versionado separado. El launcher se publica en RPmods/ubf-laucher con tag/Release y ZIP propios. `version.json` contiene la URL directa y SHA-256 del ZIP publicado; `version.json.example` es plantilla.
 
 JUGAR abre `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, muestra `INICIANDO...` y bloquea clics repetidos hasta que el juego cierre. El launcher mantiene su música pausada mientras UBF está abierto.
 

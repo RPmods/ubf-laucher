@@ -103,26 +103,17 @@ public partial class MainWindow : Window
                 ToolTip = validUrl
                     ? (name == "Twitch" ? "twitch.tv/rodrigorpmods" : uri!.Host)
                     : $"Configura el enlace de {name} en launcher.settings.json",
-                Width = name switch { "YouTube" or "Twitch" => 112, "Discord" => 106, "TikTok" => 98, _ => 86 },
-                Height = 38,
-                Padding = new Thickness(9, 3, 9, 3),
-                Margin = new Thickness(0, 0, 8, 0),
+                Width = name switch { "YouTube" or "Twitch" => 96, "Discord" => 90, "TikTok" => 84, _ => 68 },
+                Height = 32,
+                Padding = new Thickness(5, 2, 5, 2),
+                Margin = new Thickness(0, 0, 5, 0),
                 IsEnabled = validUrl,
                 Style = (Style)FindResource("QuietButton")
             };
 
-            var (startColor, endColor, borderColor) = name switch
-            {
-                "Discord" => (System.Windows.Media.Color.FromRgb(91, 79, 190), System.Windows.Media.Color.FromRgb(45, 40, 102), System.Windows.Media.Color.FromRgb(157, 145, 255)),
-                "YouTube" => (System.Windows.Media.Color.FromRgb(224, 47, 71), System.Windows.Media.Color.FromRgb(103, 24, 39), System.Windows.Media.Color.FromRgb(255, 137, 151)),
-                "Twitch" => (System.Windows.Media.Color.FromRgb(134, 73, 220), System.Windows.Media.Color.FromRgb(67, 36, 119), System.Windows.Media.Color.FromRgb(194, 153, 255)),
-                "TikTok" => (System.Windows.Media.Color.FromRgb(39, 79, 85), System.Windows.Media.Color.FromRgb(22, 36, 45), System.Windows.Media.Color.FromRgb(114, 222, 214)),
-                _ => (System.Windows.Media.Color.FromRgb(54, 82, 98), System.Windows.Media.Color.FromRgb(29, 41, 54), System.Windows.Media.Color.FromRgb(133, 177, 200))
-            };
-            button.Background = new System.Windows.Media.LinearGradientBrush(startColor, endColor, 40);
-            button.BorderBrush = new System.Windows.Media.SolidColorBrush(borderColor);
-            button.BorderThickness = new Thickness(1);
-            button.FontSize = 11;
+            button.Background = System.Windows.Media.Brushes.Transparent;
+            button.BorderThickness = new Thickness(0);
+            button.FontSize = 10;
             button.FontWeight = FontWeights.SemiBold;
 
             var content = new StackPanel
@@ -168,7 +159,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.9";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.10";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
