@@ -1,6 +1,6 @@
 {
-  "version": "1.0.11",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.11/UBFLauncher-update.zip",
-  "sha256": "ab1167e5ec791f414a3f5673e143a802804279c0531936d6642ed713066b526c",
-  "releaseNotes": "Compatibilidad con el juego UBF v1.0.4-beta. Paquete self-contained reconstruido desde la versión 1.0.11 y sin símbolos de depuración."
+  "version": "1.0.12",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.12/UBFLauncher-update.zip",
+  "sha256": "569dea8722aad76c182963f4d6c83fea0a60ba9aaf6c5239167ff332bc381796",
+  "releaseNotes": "Repara la descarga y el reemplazo de actualizaciones, limpia archivos administrados obsoletos y mejora la interfaz del launcher."
 }
