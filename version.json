@@ -1,6 +1,6 @@
 {
-  "version": "1.0.14",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.14/UBFLauncher-update.zip",
-  "sha256": "86854df51cdae7025a2f6562aff591cc426ab7e09ec090202bab155dcc027fa7",
-  "releaseNotes": "Corrige el flujo de perfil, anima el progreso, conserva JUGAR ante fallos del updater y compacta la interfaz."
+  "version": "1.0.15",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.15/UBFLauncher-update.zip",
+  "sha256": "c99ebae331a29ea5cdd042f7483d8e3349e246a64498c49c0202470c2ad84e13",
+  "releaseNotes": "Corrige la excepción al iniciar de la barra de progreso y conserva su animación segura durante verificación y descarga."
 }
