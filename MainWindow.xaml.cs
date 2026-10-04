@@ -112,11 +112,9 @@ public partial class MainWindow : Window
     {
         IdentityPanel.BeginAnimation(OpacityProperty, null);
         IdentityTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, null);
-        IdentityPulse.BeginAnimation(OpacityProperty, null);
 
         IdentityPanel.Opacity = 0;
         IdentityTransform.X = -28;
-        IdentityPulse.Opacity = 0.42;
 
         IdentityTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty,
             new DoubleAnimation(0, TimeSpan.FromMilliseconds(620))
@@ -127,12 +125,6 @@ public partial class MainWindow : Window
             new DoubleAnimation(1, TimeSpan.FromMilliseconds(540))
             {
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            });
-        IdentityPulse.BeginAnimation(OpacityProperty,
-            new DoubleAnimation(0.38, 1, TimeSpan.FromMilliseconds(900))
-            {
-                AutoReverse = true,
-                RepeatBehavior = RepeatBehavior.Forever
             });
     }
 
@@ -191,7 +183,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.16";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.17";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 

@@ -107,7 +107,7 @@ public sealed class PackageDistributionTests
         using var temp = new TemporaryDirectory();
         var logger = new Logger(Path.Combine(temp.Path, "launcher-noop.log"));
         var config = new LauncherConfig { InstallDirectory = Path.Combine(temp.Path, "game") };
-        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.16" });
+        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.17" });
         using var audio = new AudioService(config, logger);
         var verifier = new GameVerifier(logger);
         var viewModel = new MainViewModel(config, remote, verifier, new GameInstaller(remote, verifier, logger), audio, logger);
@@ -128,7 +128,7 @@ public sealed class PackageDistributionTests
         await File.WriteAllBytesAsync(Path.Combine(root, "UBF", "Binaries", "Win64", "UBF-Win64-Shipping.exe"), [1]);
         var logger = new Logger(Path.Combine(temp.Path, "launcher-failure.log"));
         var config = new LauncherConfig { InstallDirectory = root, InstalledGameVersion = "1.0.4-beta" };
-        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.17" });
+        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.18" });
         using var audio = new AudioService(config, logger);
         var verifier = new GameVerifier(logger);
         var viewModel = new MainViewModel(config, remote, verifier, new GameInstaller(remote, verifier, logger), audio, logger);

@@ -33,18 +33,9 @@
                 </Rectangle.Fill>
             </Rectangle>
         </Grid>
-        <Grid x:Name="IdentityPanel" Width="458" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="55,18,0,0" IsHitTestVisible="False" Opacity="0" Panel.ZIndex="2">
+        <Grid x:Name="IdentityPanel" Width="458" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="55,0,0,0" IsHitTestVisible="False" Opacity="0" Panel.ZIndex="2">
             <Grid.RenderTransform><TranslateTransform x:Name="IdentityTransform" X="-28" /></Grid.RenderTransform>
-            <StackPanel>
-                <Image x:Name="HeroGameLogo" Source="" Width="390" Height="219" Stretch="Uniform" HorizontalAlignment="Left" Visibility="Collapsed" />
-                <StackPanel Margin="18,-12,0,0">
-                    <TextBlock Text="UNIVERSAL" Foreground="#FFFF8791" FontFamily="Bahnschrift SemiBold" FontSize="14" FontWeight="SemiBold" />
-                    <TextBlock Text="BREAKING" Foreground="White" FontFamily="Bahnschrift SemiBold" FontSize="47" FontWeight="Bold" Margin="-3,3,0,-12" />
-                    <TextBlock Text="FIGHTERS" Foreground="#FFF0F4F5" FontFamily="Bahnschrift SemiBold" FontSize="47" FontWeight="Bold" Margin="-3,0,0,0" />
-                    <Border x:Name="IdentityPulse" Width="118" Height="3" Background="{StaticResource AccentBrush}" HorizontalAlignment="Left" Margin="1,15,0,0" Opacity="0.6" />
-                    <TextBlock Text="OPEN BETA" Foreground="#FFC3CED1" FontFamily="Bahnschrift" FontSize="10" FontWeight="SemiBold" Margin="1,8,0,0" />
-                </StackPanel>
-            </StackPanel>
+            <Image x:Name="HeroGameLogo" Source="" Width="430" Height="242" Stretch="Uniform" HorizontalAlignment="Left" Visibility="Collapsed" />
         </Grid>
 
         <Grid x:Name="WindowChrome" Height="46" VerticalAlignment="Top" MouseLeftButtonDown="Chrome_MouseLeftButtonDown" Panel.ZIndex="5">
@@ -149,7 +140,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="UBF  /  LAUNCHER" Foreground="White" FontSize="10" FontWeight="Bold" />
-                    <TextBlock x:Name="LauncherBadge" Text="V1.0.16" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
+                    <TextBlock x:Name="LauncherBadge" Text="V1.0.17" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>
