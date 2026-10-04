@@ -40,6 +40,9 @@ foreach ($asset in @('launcher.settings.json', 'Assets\background.mp4', 'Assets\
 }
 Copy-Item -LiteralPath $updaterExe -Destination (Join-Path $launcherOutput 'UBFLauncherUpdater.exe') -Force
 
+$debugSymbols = @(Get-ChildItem -LiteralPath $launcherOutput -Filter '*.pdb' -Recurse -File)
+$debugSymbols | Remove-Item -Force
+
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::CreateFromDirectory(
     $launcherOutput,

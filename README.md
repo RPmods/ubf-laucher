@@ -1,20 +1,20 @@
 # UBF y UBFLauncher
 
-Proyectos separados: juego UBF (Unreal Engine 5.8) y launcher WPF (.NET 8).
+El juego UBF (Unreal Engine 5.8.2) y UBFLauncher (WPF/.NET 8) son productos distintos y usan versionado, repositorios, tags y Releases independientes.
 
-## Distribución del juego
+## Juego UBF
 
-UBF se publica como ZIP en una Release de RPmods/ubf. `manifest.json` se publica separado en la rama principal, con la versión, URL, tamaño y SHA-256 del ZIP, más hashes y tamaños por archivo extraído.
+El juego se publica como ZIP en `RPmods/ubf`. `manifest.json` en la rama `main` identifica la versión del juego, la URL, tamaño y SHA-256 del ZIP, más los hashes y tamaños de los archivos instalados. El launcher lee el manifest para verificar la instalación; la opción VERIFICAR no descarga el ZIP. La descarga solo ocurre al instalar, actualizar o reparar.
 
-VERIFY solo lee el manifiesto y compara los hashes locales; no descarga el ZIP. INSTALL/UPDATE/REPAIR descarga y extrae el paquete únicamente al confirmar esa acción. Una instalación que coincide con la versión publicada queda lista sin descargarlo. Usa como carpeta de instalación la raíz del paquete que contiene `UBF.exe`, `Engine/` y `UBF/`; no selecciones `Binaries/Win64` del proyecto fuente.
+El flujo de presentación construye el árbol UMG en `NativeOnInitialized`, antes de que Slate componga el primer frame. Los dos MP3 de la intro son `SoundWave` UAssets y se reproducen con componentes de audio 2D: `musicintro` inicia primero y su callback inicia `musicintrobucle`. `intro.mp4` conduce al menú; el video de fondo se abre solo al entrar al menú, con un fondo estático disponible si falla la reproducción. El empaquetado conserva los videos como archivos no UFS y cocina las SoundWave.
 
-Guía completa: [UBF_DISTRIBUTION_SETUP.txt](UBF_DISTRIBUTION_SETUP.txt).
+Guía de build, validación y publicación: [UBF_DISTRIBUTION_SETUP.txt](UBF_DISTRIBUTION_SETUP.txt).
 
 ## UBFLauncher
 
-Launcher 1.0.10 y juego 1.0.3-beta tienen versionado separado. El launcher se publica en RPmods/ubf-laucher con tag/Release y ZIP propios. `version.json` contiene la URL directa y SHA-256 del ZIP publicado; `version.json.example` es plantilla.
+Launcher v1.0.11 apunta al juego UBF v1.0.4-beta. Los números no se sincronizan: publicar una actualización del launcher no crea, reemplaza ni retira una Release del juego. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
 
-JUGAR abre `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, muestra `INICIANDO...` y bloquea clics repetidos hasta que el juego cierre. El launcher mantiene su música pausada mientras UBF está abierto.
+JUGAR inicia `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, cambia a `INICIANDO...` y bloquea clics repetidos. El audio del launcher se pausa mientras UBF está abierto.
 
 ```powershell
 dotnet build .\UBFLauncher.slnx -c Release
@@ -22,20 +22,17 @@ dotnet test .\tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj -c Release
 .\publish.ps1
 ```
 
-`publish.ps1` crea las salidas self-contained bajo `publish/`. No modifica Releases remotas.
+`publish.ps1` genera el launcher y updater self-contained en `publish/`, valida los ejecutables y los recursos, excluye símbolos PDB de depuración y crea `UBFLauncher-update.zip`. Solo limpia salidas dentro de ese directorio local; no cambia las Releases remotas.
 
 ## Repositorios
 
 - Juego: https://github.com/RPmods/ubf
 - Launcher: https://github.com/RPmods/ubf-laucher
 
-Usa Git LFS para videos grandes. No subir outputs generados ni credenciales.
+Usa Git LFS para recursos de video grandes. No subas salidas generadas ni credenciales.
 
-## Releases publicadas
+## Releases actuales
 
-- Juego UBF v1.0.3-beta: [Release](https://github.com/RPmods/ubf/releases/tag/v1.0.3-beta), ZIP 435204941 bytes; SHA-256 `51a2b972429c617d59f9b1b655251f606b95f31b655a48c68fb6fbd3c8fd4664`.
-- UBFLauncher v1.0.10: [Release](https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.10), ZIP 350125627 bytes; SHA-256 `1a622a670b89329e004e6e51b9dc840205b9260d37a13cd0a7e837abf930ff98`.
-- Se conservan UBF v1.0.1-beta y v1.0.2-beta porque son versiones independientes del juego. Tras verificar UBFLauncher v1.0.10, se retiró la Release anterior del launcher v1.0.9; su tag y fuentes siguen en Git.
-- El manifiesto del juego y `version.json` del launcher están publicados en sus respectivas ramas `main`.
-
-
+- Juego UBF v1.0.4-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.4-beta. ZIP `UBF-v1.0.4-beta.zip`, 488806022 bytes, SHA-256 `5055229aed8d623e1da2131fc92df26029c052bd0e329837b355b29b5b5239e1`.
+- UBFLauncher v1.0.11: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.11. El tamaño y SHA-256 se anotan aquí una vez que se genere y publique el ZIP desde esta revisión.
+- Se conservan las Releases antiguas del juego como versiones independientes. La limpieza de Releases del launcher se realiza después de probar la nueva versión, sin borrar tags ni commits.

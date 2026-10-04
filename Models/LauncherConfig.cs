@@ -8,7 +8,7 @@ public sealed class LauncherConfig
     public string LauncherRepository { get; set; } = "RPmods/ubf-laucher";
     public string GameManifestPath { get; set; } = "manifest.json";
     public string LauncherVersionPath { get; set; } = "version.json";
-    public string TargetGameVersion { get; set; } = "1.0.3-beta";
+    public string TargetGameVersion { get; set; } = "1.0.4-beta";
     public string GameExecutableName { get; set; } = "UBF.EXE";
     public string InstallDirectory { get; set; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UBF", "Game");
