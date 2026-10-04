@@ -102,6 +102,23 @@ public sealed class PackageDistributionTests
     }
 
     [Fact]
+    public async Task LauncherUpdateWithoutANewerVersionReenablesControls()
+    {
+        using var temp = new TemporaryDirectory();
+        var logger = new Logger(Path.Combine(temp.Path, "launcher-noop.log"));
+        var config = new LauncherConfig { InstallDirectory = Path.Combine(temp.Path, "game") };
+        var remote = new FakeDistributionService(new LauncherVersion { Version = "1.0.13" });
+        using var audio = new AudioService(config, logger);
+        var verifier = new GameVerifier(logger);
+        var viewModel = new MainViewModel(config, remote, verifier, new GameInstaller(remote, verifier, logger), audio, logger);
+
+        await viewModel.UpdateLauncherAsync();
+
+        Assert.False(viewModel.IsBusy);
+        Assert.True(viewModel.CanVerify);
+    }
+
+    [Fact]
     public async Task RepeatedVerificationNeverDownloadsTheGamePackage()
     {
         using var temp = new TemporaryDirectory();
@@ -468,6 +485,7 @@ public sealed class PackageDistributionTests
         private readonly byte[]? _packageBytes;
         private readonly Exception? _manifestError;
         private readonly GameManifest? _gameManifest;
+        private readonly LauncherVersion? _launcherVersion;
         public int ManifestRequests { get; private set; }
         public int PackageRequests { get; private set; }
 
@@ -475,6 +493,7 @@ public sealed class PackageDistributionTests
         public FakeDistributionService(byte[] packageBytes) => _packageBytes = packageBytes;
         public FakeDistributionService(Exception manifestError) => _manifestError = manifestError;
         public FakeDistributionService(GameManifest manifest) => _gameManifest = manifest;
+        public FakeDistributionService(LauncherVersion launcherVersion) => _launcherVersion = launcherVersion;
 
         public Task<GameManifest> GetGameManifestAsync(CancellationToken cancellationToken = default)
         {
@@ -486,7 +505,7 @@ public sealed class PackageDistributionTests
                     : Task.FromException<GameManifest>(new InvalidOperationException("A test manifest was not configured."));
         }
 
-        public Task<LauncherVersion?> GetLauncherVersionAsync(CancellationToken cancellationToken = default) => Task.FromResult<LauncherVersion?>(null);
+        public Task<LauncherVersion?> GetLauncherVersionAsync(CancellationToken cancellationToken = default) => Task.FromResult(_launcherVersion);
 
         public async Task DownloadGamePackageAsync(GamePackage package, string destination,
             IProgress<(long Received, long Total)>? progress, CancellationToken cancellationToken = default)

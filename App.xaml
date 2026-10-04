@@ -60,15 +60,16 @@
         </Style>
 
         <Style x:Key="OperationProgressBar" TargetType="ProgressBar">
-            <Setter Property="Height" Value="9" />
-            <Setter Property="Background" Value="#5C607077" />
+            <Setter Property="Height" Value="8" />
+            <Setter Property="Background" Value="#314D5A60" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ProgressBar">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5" ClipToBounds="True">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="#4D97A5AA" BorderThickness="1" CornerRadius="4" ClipToBounds="True">
                             <Grid>
-                                <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="5">
+                                <Border x:Name="PART_Track" Background="Transparent" CornerRadius="4" />
+                                <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="4" ClipToBounds="True">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                             <GradientStop Color="#FFFF8A69" Offset="0" />
@@ -76,7 +77,7 @@
                                             <GradientStop Color="#FFAD6BFF" Offset="1" />
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Grid ClipToBounds="True">
+                                    <Grid>
                                         <Rectangle x:Name="ProgressShimmer" Opacity="0.28" Width="90" HorizontalAlignment="Left">
                                             <Rectangle.Fill>
                                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
@@ -87,28 +88,36 @@
                                             </Rectangle.Fill>
                                             <Rectangle.RenderTransform><TranslateTransform x:Name="ProgressShimmerTransform" X="-100" /></Rectangle.RenderTransform>
                                         </Rectangle>
-                                        <Grid.Triggers>
-                                            <EventTrigger RoutedEvent="Loaded">
-                                                <BeginStoryboard>
-                                                    <Storyboard RepeatBehavior="Forever">
-                                                        <DoubleAnimation Storyboard.TargetName="ProgressShimmerTransform" Storyboard.TargetProperty="X" From="-100" To="520" Duration="0:0:1.35" />
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </Grid.Triggers>
                                     </Grid>
                                 </Border>
-                                <Border x:Name="IndeterminatePulse" Background="#66FFFFFF" Opacity="0" CornerRadius="5" />
+                                <Border x:Name="IndeterminateIndicator" Width="104" HorizontalAlignment="Left" Visibility="Collapsed" CornerRadius="4" ClipToBounds="True">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#00FF8A69" Offset="0" />
+                                            <GradientStop Color="#CCFF5D79" Offset="0.45" />
+                                            <GradientStop Color="#FFFFE3D6" Offset="0.65" />
+                                            <GradientStop Color="#00FF8A69" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border.RenderTransform><TranslateTransform x:Name="IndeterminateTransform" X="-110" /></Border.RenderTransform>
+                                </Border>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="ProgressShimmerTransform" Storyboard.TargetProperty="X" From="-100" To="520" Duration="0:0:1.35" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
                             <Trigger Property="IsIndeterminate" Value="True">
-                                <Setter TargetName="PART_Indicator" Property="Width" Value="0" />
-                                <Setter TargetName="IndeterminatePulse" Property="Opacity" Value="0.45" />
+                                <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="IndeterminateIndicator" Property="Visibility" Value="Visible" />
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
-                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation Storyboard.TargetName="IndeterminatePulse" Storyboard.TargetProperty="Opacity" From="0.12" To="0.56" Duration="0:0:0.65" />
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="IndeterminateTransform" Storyboard.TargetProperty="X" From="-110" To="420" Duration="0:0:0.85" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>

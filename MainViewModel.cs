@@ -23,6 +23,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _progressText = "";
     private double _progress;
     private bool _busy;
+    private bool _progressIsIndeterminate;
     private bool _launcherUpdateAvailable;
     private string _currentFile = "";
     private string _availableGameVersion = "";
@@ -88,7 +89,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public IReadOnlyDictionary<string, string> SocialLinks => _config.SocialLinks;
     public double MusicVolume => _audio.Volume;
     public bool ShowOperationProgress => IsBusy;
-    public bool IsProgressIndeterminate => IsBusy && State == LauncherState.Verifying && string.IsNullOrWhiteSpace(CurrentFile);
+    public bool IsProgressIndeterminate => IsBusy && _progressIsIndeterminate;
     public string InstalledGameVersion => HasLocalGameExecutable
         ? string.IsNullOrWhiteSpace(_config.InstalledGameVersion) ? UiText.Get(_language, "version_unknown") : _config.InstalledGameVersion
         : UiText.Get(_language, "version_not_installed");
@@ -175,13 +176,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
             State = LauncherState.Verifying;
             Status = UiText.Get(_language, "checking_files");
             Details = UiText.Get(_language, "reading_manifest");
+            CurrentFile = "";
             Progress = 0;
             ProgressText = "";
+            SetProgressIndeterminate(true);
             _manifest = await _distribution.GetGameManifestAsync();
             SetAvailableGameVersion(_manifest.Version);
             var verifyProgress = new Progress<(string FileName, int Checked, int Total)>(value =>
             {
                 CurrentFile = value.FileName;
+                SetProgressIndeterminate(value.Total <= 0);
                 Progress = value.Total == 0 ? 0 : value.Checked * 100d / value.Total;
                 ProgressText = UiText.Get(_language, "verify_count", value.Checked, value.Total);
             });
@@ -216,7 +220,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
         catch (ReleaseNotPublishedException ex) { HandleReleaseNotPublished(ex); }
         catch (Exception ex) { HandleRemoteGameOperationError(UiText.Get(_language, "error_verify"), ex); }
-        finally { IsBusy = false; }
+        finally { SetProgressIndeterminate(false); IsBusy = false; }
     }
 
     public async Task InstallOrUpdateGameAsync(string? selectedDirectory = null)
@@ -245,6 +249,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _retryOperation = RetryOperation.Install;
         try
         {
+            CurrentFile = "";
+            SetProgressIndeterminate(true);
             _manifest = await _distribution.GetGameManifestAsync();
             SetAvailableGameVersion(_manifest.Version);
             var updating = File.Exists(Path.Combine(_config.InstallDirectory, _config.GameExecutableName))
@@ -257,6 +263,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var progress = new Progress<OperationProgress>(value =>
             {
                 CurrentFile = value.FileName;
+                SetProgressIndeterminate(value.TotalExpected <= 0);
                 Progress = value.Percent;
                 var received = FormatBytes(value.TotalReceived);
                 var remaining = FormatBytes(Math.Max(0, value.TotalExpected - value.TotalReceived));
@@ -279,7 +286,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
         catch (ReleaseNotPublishedException ex) { HandleReleaseNotPublished(ex); }
         catch (Exception ex) { HandleRemoteGameOperationError(UiText.Get(_language, "error_install"), ex); }
-        finally { IsBusy = false; }
+        finally { SetProgressIndeterminate(false); IsBusy = false; }
     }
 
     public Task RetryLastOperationAsync() => _retryOperation == RetryOperation.Install
@@ -392,6 +399,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         if (IsBusy) return;
         IsBusy = true;
+        var updateHandoffStarted = false;
         string? updateTemp = null;
         try
         {
@@ -406,14 +414,24 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var archive = Path.Combine(updateTemp, "launcher-update.zip");
             Status = UiText.Get(_language, "launcher_downloading");
             Details = UiText.Get(_language, "launcher_version", remote.Version);
+            CurrentFile = "";
             Progress = 0;
             ProgressText = UiText.Get(_language, "calculating_download");
+            SetProgressIndeterminate(true);
             var downloadProgress = new Progress<(long Received, long Total)>(value =>
             {
-                var total = value.Total > 0 ? value.Total : Math.Max(value.Received, 1);
-                Progress = value.Received * 100d / total;
+                if (value.Total <= 0)
+                {
+                    SetProgressIndeterminate(true);
+                    Progress = 0;
+                    ProgressText = UiText.Get(_language, "download_progress", "—", FormatBytes(value.Received), "—", "—");
+                    return;
+                }
+
+                SetProgressIndeterminate(false);
+                Progress = value.Received * 100d / value.Total;
                 ProgressText = UiText.Get(_language, "download_progress", Math.Round(Progress), FormatBytes(value.Received),
-                    FormatBytes(Math.Max(0, total - value.Received)), "—");
+                    FormatBytes(Math.Max(0, value.Total - value.Received)), "—");
             });
             await _distribution.DownloadAsync(new Uri(remote.DownloadUrl), archive, downloadProgress);
             await using (var stream = File.OpenRead(archive))
@@ -423,6 +441,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
             var args = $"--apply \"{archive}\" \"{AppContext.BaseDirectory}\" {Environment.ProcessId} \"{updateTemp}\"";
             Process.Start(new ProcessStartInfo(updater, args) { UseShellExecute = true, WorkingDirectory = AppContext.BaseDirectory });
+            updateHandoffStarted = true;
             UpdateHandoffRequested?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
@@ -432,7 +451,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 try { if (Directory.Exists(updateTemp)) Directory.Delete(updateTemp, true); } catch { }
             }
             HandleError(UiText.Get(_language, "error_launcher_update"), ex);
-            IsBusy = false;
+        }
+        finally
+        {
+            SetProgressIndeterminate(false);
+            if (!updateHandoffStarted) IsBusy = false;
         }
     }
 
@@ -561,7 +584,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasLauncherUpdate));
     }
 
-    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.12";
+    private void SetProgressIndeterminate(bool value)
+    {
+        if (_progressIsIndeterminate == value) return;
+        _progressIsIndeterminate = value;
+        OnPropertyChanged(nameof(IsProgressIndeterminate));
+    }
+
+    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.13";
 
     private enum RetryOperation { Verify, Install }
 

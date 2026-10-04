@@ -12,6 +12,9 @@ namespace UBFLauncher;
 
 public partial class MainWindow : Window
 {
+    private const double GameOverlayOpacity = 0.12;
+    private const double ProfileOverlayOpacity = 0.35;
+
     [DllImport("user32.dll")]
     [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -61,13 +64,17 @@ public partial class MainWindow : Window
         if (_viewModel.HasUserName)
         {
             _showingUserPanel = false;
+            BackgroundOverlay.Opacity = GameOverlayOpacity;
             GamePanel.Visibility = Visibility.Visible;
+            GamePanel.IsHitTestVisible = true;
             AnimateGameIn();
         }
         else
         {
             _showingUserPanel = true;
+            BackgroundOverlay.Opacity = ProfileOverlayOpacity;
             UserPanel.Visibility = Visibility.Visible;
+            UserPanel.IsHitTestVisible = true;
             UserNameInput.Focus();
             UserNameInput.SelectAll();
             AnimateUserIn();
@@ -156,7 +163,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.12";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.13";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
@@ -199,8 +206,9 @@ public partial class MainWindow : Window
         NameError.Text = "";
         _showingUserPanel = false;
         await AnimateUserOutAsync();
-        BackgroundOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(520)));
+        BackgroundOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation(GameOverlayOpacity, TimeSpan.FromMilliseconds(360)));
         GamePanel.Visibility = Visibility.Visible;
+        GamePanel.IsHitTestVisible = true;
         AnimateGameIn();
         await _viewModel.RefreshUpdatesAsync();
     }
@@ -264,18 +272,17 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ChangeUser_Click(object sender, RoutedEventArgs e)
+    private async void ChangeUser_Click(object sender, RoutedEventArgs e)
     {
-        if (_showingUserPanel) return;
+        if (_showingUserPanel || _viewModel.IsBusy) return;
         _showingUserPanel = true;
         _viewModel.ChangeUserName();
         NameError.Text = "";
-        BackgroundOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(420)));
+        GamePanel.IsHitTestVisible = false;
+        BackgroundOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation(ProfileOverlayOpacity, TimeSpan.FromMilliseconds(300)));
+        await AnimateGameOutAsync();
         UserPanel.Visibility = Visibility.Visible;
-        var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(180));
-        GamePanel.BeginAnimation(OpacityProperty, fade);
-        var slideOut = new DoubleAnimation(34, TimeSpan.FromMilliseconds(180));
-        GameTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, slideOut);
+        UserPanel.IsHitTestVisible = true;
         AnimateUserIn();
         UserNameInput.Focus();
         UserNameInput.SelectAll();
@@ -283,6 +290,7 @@ public partial class MainWindow : Window
 
     private async Task AnimateUserOutAsync()
     {
+        UserPanel.IsHitTestVisible = false;
         var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(190));
         UserPanel.BeginAnimation(OpacityProperty, fade);
         var slide = new DoubleAnimation(-65, TimeSpan.FromMilliseconds(190));
@@ -291,14 +299,32 @@ public partial class MainWindow : Window
         UserPanel.Visibility = Visibility.Collapsed;
     }
 
+    private async Task AnimateGameOutAsync()
+    {
+        var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(180));
+        GamePanel.BeginAnimation(OpacityProperty, fade);
+        var slide = new DoubleAnimation(34, TimeSpan.FromMilliseconds(180));
+        GameTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, slide);
+        await Task.Delay(190);
+        GamePanel.Visibility = Visibility.Collapsed;
+    }
+
     private void AnimateUserIn()
     {
+        UserPanel.BeginAnimation(OpacityProperty, null);
+        UserTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, null);
+        UserPanel.Opacity = 0;
+        UserTransform.X = 34;
         UserTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(420)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } });
         UserPanel.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(360)));
     }
 
     private void AnimateGameIn()
     {
+        GamePanel.BeginAnimation(OpacityProperty, null);
+        GameTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, null);
+        GamePanel.Opacity = 0;
+        GameTransform.X = 34;
         GameTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(520)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } });
         GamePanel.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(480)));
     }
