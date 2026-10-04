@@ -163,7 +163,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.14";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.15";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 
