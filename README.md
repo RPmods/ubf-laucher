@@ -34,8 +34,8 @@ Usa Git LFS para videos grandes. No subir outputs generados ni credenciales.
 ## Releases publicadas
 
 - Juego UBF v1.0.3-beta: [Release](https://github.com/RPmods/ubf/releases/tag/v1.0.3-beta), ZIP 435204941 bytes; SHA-256 `51a2b972429c617d59f9b1b655251f606b95f31b655a48c68fb6fbd3c8fd4664`.
-- UBFLauncher v1.0.9: [Release](https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.9), ZIP 350127182 bytes; SHA-256 `50338c6e1152c0d63ed2e6cc2751d103ae62c78f6f2a20d050fbaaea2f8b4809`.
-- Se conserva UBF v1.0.1-beta porque es una versión independiente del juego. Las Releases obsoletas del launcher v1.0.6, v1.0.7 y v1.0.8 se retiraron tras verificar la v1.0.9; sus tags e historial Git se conservan.
+- UBFLauncher v1.0.10: [Release](https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.10), ZIP 350125627 bytes; SHA-256 `1a622a670b89329e004e6e51b9dc840205b9260d37a13cd0a7e837abf930ff98`.
+- Se conservan UBF v1.0.1-beta y v1.0.2-beta porque son versiones independientes del juego. Tras verificar UBFLauncher v1.0.10, se retiró la Release anterior del launcher v1.0.9; su tag y fuentes siguen en Git.
 - El manifiesto del juego y `version.json` del launcher están publicados en sus respectivas ramas `main`.
 
 

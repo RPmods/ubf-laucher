@@ -1,6 +1,6 @@
 {
-  "version": "1.0.9",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.9/UBFLauncher-update.zip",
-  "sha256": "50338c6e1152c0d63ed2e6cc2751d103ae62c78f6f2a20d050fbaaea2f8b4809",
-  "releaseNotes": "UI refinada con tarjetas de estado, jerarquía visual y microinteracciones. Mantiene la verificación sin descargas repetidas y el arranque anti spam del juego."
+  "version": "1.0.10",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.10/UBFLauncher-update.zip",
+  "sha256": "1a622a670b89329e004e6e51b9dc840205b9260d37a13cd0a7e837abf930ff98",
+  "releaseNotes": "Interfaz simplificada y ordenada: se eliminaron paneles redundantes y se aclaró la jerarquía entre estado, progreso y acciones."
 }
