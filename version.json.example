@@ -1,6 +1,6 @@
 {
-  "version": "1.0.19",
+  "version": "1.0.23",
   "downloadUrl": "",
   "sha256": "",
-  "releaseNotes": "Agrega donaciones por PayPal, actualiza el fondo, reduce 40% el volumen de la música y apunta a UBF v1.0.7-beta."
+  "releaseNotes": "Lee la versión disponible directamente del manifiesto de UBF y permite actualizar el juego de forma independiente."
 }

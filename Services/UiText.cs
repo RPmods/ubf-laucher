@@ -97,7 +97,7 @@ public static class UiText
         ["action_launching"] = ("INICIANDO...", "STARTING..."),
         ["action_retry"] = ("REINTENTAR", "RETRY"),
         ["game_release_not_published"] = ("La versión del juego aún no está publicada", "The game release is not published yet"),
-        ["game_release_not_published_details"] = ("Se requiere UBF {0}. El repositorio https://github.com/{1}/{2} todavía no contiene el manifiesto o los archivos del juego.", "UBF {0} is required. Repository https://github.com/{1}/{2} does not contain the manifest or game files yet.")
+        ["game_release_not_published_details"] = ("El repositorio https://github.com/{0}/{1} todavía no contiene un manifiesto publicado para el juego.", "Repository https://github.com/{0}/{1} does not contain a published game manifest yet.")
     };
 
     public static string Get(string language, string key, params object?[] arguments)

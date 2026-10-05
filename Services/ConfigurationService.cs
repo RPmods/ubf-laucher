@@ -32,7 +32,6 @@ public static class ConfigurationService
                     config.LauncherRepository = overlay.Settings.LauncherRepository;
                     config.GameManifestPath = overlay.Settings.GameManifestPath;
                     config.LauncherVersionPath = overlay.Settings.LauncherVersionPath;
-                    config.TargetGameVersion = overlay.Settings.TargetGameVersion;
                     config.BackgroundVideoPath = overlay.Settings.BackgroundVideoPath;
                     config.MusicPath = overlay.Settings.MusicPath;
                     config.AlternateMusicPath = overlay.Settings.AlternateMusicPath;

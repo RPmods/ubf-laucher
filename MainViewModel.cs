@@ -535,7 +535,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         Status = UiText.Get(_language, "game_release_not_published");
         var owner = _config.GameRepository.Split('/').FirstOrDefault() ?? "RPmods";
         var repository = _config.GameRepository.Split('/').Skip(1).FirstOrDefault() ?? "ubf";
-        Details = UiText.Get(_language, "game_release_not_published_details", _config.TargetGameVersion, owner, repository);
+        Details = UiText.Get(_language, "game_release_not_published_details", owner, repository);
         if (HasLocalGameExecutable)
             Details += " " + UiText.Get(_language, "local_play_available");
     }

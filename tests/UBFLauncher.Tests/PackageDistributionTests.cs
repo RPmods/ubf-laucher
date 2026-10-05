@@ -3,6 +3,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Collections;
 using System.Resources;
+using System.Text.Json;
 using UBFLauncher.Models;
 using UBFLauncher.Services;
 using Xunit;
@@ -11,6 +12,28 @@ namespace UBFLauncher.Tests;
 
 public sealed class PackageDistributionTests
 {
+    [Fact]
+    public async Task GameManifestVersionCanAdvanceIndependentlyOfLauncher()
+    {
+        using var temp = new TemporaryDirectory();
+        var manifest = new GameManifest
+        {
+            Version = "1.0.8-beta",
+            Files = [new GameFile { Path = "UBF.exe", Size = 1, Sha256 = Hash([1]) }]
+        };
+        var payload = JsonSerializer.SerializeToUtf8Bytes(manifest);
+        var config = new LauncherConfig
+        {
+            GameManifestUrlOverride = "https://updates.example.invalid/manifest.json"
+        };
+        var service = new GitHubDistributionService(config, new Logger(Path.Combine(temp.Path, "dynamic-version.log")),
+            new StaticHttpMessageHandler(payload));
+
+        var result = await service.GetGameManifestAsync();
+
+        Assert.Equal("1.0.8-beta", result.Version);
+    }
+
     [Fact]
     public async Task CleanInstallDownloadsZipValidatesFilesAndPreservesUserData()
     {

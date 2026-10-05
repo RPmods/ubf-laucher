@@ -21,9 +21,9 @@ UBFLauncher
 Las secuencias son independientes. Actualizar UBFLauncher no cambia, reemplaza ni retira un juego. Eliminar una Release obsoleta del launcher nunca autoriza eliminar una Release del juego. No eliminar tags, commits ni fuentes necesarios para reconstruir versiones.
 
 Versiones públicas de referencia:
-- Juego UBF v1.0.7-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.7-beta.
-- UBFLauncher v1.0.19, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.19.
-- UBFLauncher v1.0.19 fija el objetivo del juego en UBF v1.0.7-beta; `version.json` apunta al ZIP publicado.
+- Juego UBF v1.0.8-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.8-beta.
+- UBFLauncher v1.0.23, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.23.
+- UBFLauncher obtiene la versión disponible de UBF desde `manifest.json`; no queda fijado a una versión concreta del juego.
 
 2. PRESENTACIÓN, INTRO Y AUDIO DE UBF
 ------------------------------------
@@ -81,7 +81,7 @@ El script comprueba que el manifest y el ZIP coincidan con la build; publicar el
 
 1. Modificar el proyecto fuente en D:\proyectos\UBFLauncher y mantener el repositorio fuente en RPmods/ubf-laucher actualizado.
 2. Incrementar la versión propia del launcher y del updater en sus respectivos `.csproj` y `app.manifest`; actualizar badge/fallbacks de versión y `version.json.example`. Ambos ejecutables deben compartir el mismo número de versión. Mantener `version.json` con la versión pública actual hasta publicar el asset nuevo.
-3. Cambiar Settings.TargetGameVersion en launcher.settings.json y Models/LauncherConfig.cs solamente cuando haya una versión nueva del juego publicada y su manifest corresponda. No igualar ambas versiones por obligación. En esta revisión el launcher apunta al juego v1.0.7-beta.
+3. No fijar la versión del juego dentro del launcher. Cada inicio lee `manifest.json` y usa su versión como la versión disponible; las versiones del launcher y del juego permanecen independientes. Solo publicar una nueva versión del launcher cuando cambie su funcionalidad.
 4. Compilar y correr la suite existente:
 
    dotnet build .\UBFLauncher.slnx -c Release
@@ -132,3 +132,12 @@ UBFLauncher v1.0.17:
 - Release: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.19. Asset `UBFLauncher-update.zip` cargado; `version.json` de `main` apunta a su URL y SHA-256.
 - La ventana del ejecutable nuevo no se pudo verificar visualmente: la herramienta abrió/enfocó una copia antigua y no expuso la ventana del build. No afirmar una prueba visual interactiva de PayPal, JUGAR o VERIFICAR.
 - Tras verificar esta Release, retirar la Release anterior del launcher v1.0.18, conservando su tag y commits. Mantener intactas todas las Releases y los tags del juego.
+
+
+8. PUBLICACIÓN v1.0.23 — UBFLauncher
+-------------------------------------
+
+- Cambio funcional: se eliminó la versión fija del juego en el launcher. Ahora lee el número de versión desde `manifest.json`, de modo que una actualización de UBF no requiere por sí sola otra versión del launcher.
+- Se compilaron el launcher y el updater self-contained para Windows x64, se validaron sus versiones y recursos, y se ejecutó la suite automatizada.
+- Artefacto: `UBFLauncher-update.zip`; el tamaño, SHA-256, tag y URL públicos se registran aquí después de verificar la Release.
+- El juego UBF v1.0.8-beta se publica exclusivamente en `RPmods/ubf`; no sustituye ni elimina releases anteriores del juego.

@@ -36,8 +36,6 @@ public sealed class GitHubDistributionService : IDistributionService
         var manifest = await response.Content.ReadFromJsonAsync<GameManifest>(JsonOptions, cancellationToken)
             ?? throw new InvalidDataException("The game manifest is empty.");
         ValidateManifest(manifest);
-        if (!manifest.Version.Equals(_config.TargetGameVersion, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException($"This launcher is pinned to game version {_config.TargetGameVersion}; the repository manifest declares {manifest.Version}.");
         if (!manifest.Files.Any(file => file.Path.Equals(_config.GameExecutableName, StringComparison.OrdinalIgnoreCase)))
             throw new InvalidDataException($"The game manifest must include {_config.GameExecutableName}.");
         return manifest;

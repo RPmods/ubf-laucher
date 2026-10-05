@@ -1,6 +1,6 @@
 # UBF y UBFLauncher
 
-El juego UBF (Unreal Engine 5.8.2) y UBFLauncher (WPF/.NET 8) son productos distintos y usan versionado, repositorios, tags y Releases independientes.
+El juego UBF (Unreal Engine 5.8.2) y UBFLauncher (WPF/.NET 8) son productos distintos y usan versionado, repositorios, tags y Releases independientes. UBFLauncher toma la versión disponible del juego desde `manifest.json`, sin fijarse a una versión concreta.
 
 ## Juego UBF
 
@@ -12,7 +12,7 @@ Guía de build, validación y publicación: [UBF_DISTRIBUTION_SETUP.txt](UBF_DIS
 
 ## UBFLauncher
 
-La Release pública del launcher es v1.0.19 y apunta al juego UBF v1.0.7-beta. Los números no se sincronizan: publicar una actualización del launcher no crea, reemplaza ni retira una Release del juego. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
+La Release pública del launcher es v1.0.23. Obtiene la versión disponible del juego desde el manifiesto de `RPmods/ubf`; los números de versión del launcher y del juego siguen independientes. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
 
 JUGAR inicia `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, cambia a `INICIANDO...` y bloquea clics repetidos. El audio del launcher se pausa mientras UBF está abierto.
 
@@ -33,6 +33,6 @@ Usa Git LFS para recursos de video grandes. No subas salidas generadas ni creden
 
 ## Releases actuales
 
-- Juego UBF v1.0.7-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.7-beta. El ZIP es `UBF-v1.0.7-beta.zip`; `manifest.json` incluye tamaño y SHA-256.
-- UBFLauncher v1.0.19: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.19. ZIP `UBFLauncher-update.zip`, 171883515 bytes, SHA-256 `ea124d223a36cfc1d69ef4f0de3d4c5258e42b1b7b1c3ed563734d7da13dfe45`.
+- Juego UBF: la versión y el paquete disponibles se consultan en https://github.com/RPmods/ubf/releases y en `manifest.json`.
+- UBFLauncher v1.0.23: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.23. ZIP `UBFLauncher-update.zip`; `version.json` publica su tamaño y SHA-256.
 - La compilación y las 25 pruebas automatizadas pasaron. La prueba visual no pudo completarse: el control del escritorio enfocó la instalación antigua y no expuso la ventana del build publicado.
