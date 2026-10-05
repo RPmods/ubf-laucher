@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using UBFLauncher.Models;
 using UBFLauncher.Services;
 
@@ -38,7 +40,10 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        _instanceMutex = new Mutex(true, @"Local\RPmods.UBFLauncher.SingleInstance", out _ownsInstanceMutex);
+        var executablePath = Environment.ProcessPath ?? Environment.GetCommandLineArgs()[0];
+        var installationKey = Convert.ToHexString(SHA256.HashData(
+            Encoding.UTF8.GetBytes(Path.GetFullPath(executablePath).ToUpperInvariant())));
+        _instanceMutex = new Mutex(true, $@"Local\RPmods.UBFLauncher.{installationKey}", out _ownsInstanceMutex);
         if (!_ownsInstanceMutex)
         {
             ActivateExistingInstance();

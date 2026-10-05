@@ -130,18 +130,25 @@ public partial class MainWindow : Window
 
     private void BuildSocialLinks()
     {
-        foreach (var name in new[] { "Discord", "YouTube", "Twitch", "TikTok", "Web" })
+        foreach (var name in new[] { "Discord", "YouTube", "Twitch", "TikTok", "Web", "PayPal" })
         {
             _config.SocialLinks.TryGetValue(name, out var url);
+            if (name == "PayPal" && string.IsNullOrWhiteSpace(url))
+                url = "https://www.paypal.com/paypalme/rodrigorpmods";
             var validUrl = Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps;
             var button = new Button
             {
                 ToolTip = validUrl
-                    ? (name == "Twitch" ? "twitch.tv/rodrigorpmods" : uri!.Host)
+                    ? name switch
+                    {
+                        "Twitch" => "twitch.tv/rodrigorpmods",
+                        "PayPal" => "Donar por PayPal",
+                        _ => uri!.Host
+                    }
                     : $"Configura el enlace de {name} en launcher.settings.json",
-                Width = 32,
+                Width = name == "PayPal" ? 94 : 32,
                 Height = 32,
-                Padding = new Thickness(0),
+                Padding = name == "PayPal" ? new Thickness(9, 0, 10, 0) : new Thickness(0),
                 Margin = new Thickness(0, 0, 6, 0),
                 IsEnabled = validUrl,
                 Style = (Style)FindResource("QuietButton")
@@ -152,14 +159,44 @@ public partial class MainWindow : Window
             button.FontSize = 10;
             button.FontWeight = FontWeights.SemiBold;
 
-            button.Content = new System.Windows.Controls.Image
+            var mark = new System.Windows.Controls.Image
             {
                 Source = (System.Windows.Media.ImageSource)FindResource($"{name}Mark"),
                 Width = 16,
                 Height = 16,
                 Stretch = System.Windows.Media.Stretch.Uniform
             };
-            button.SetValue(System.Windows.Automation.AutomationProperties.NameProperty, $"Abrir {name}");
+            if (name == "PayPal")
+            {
+                var content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                content.Children.Add(mark);
+                content.Children.Add(new TextBlock
+                {
+                    Text = "DONAR",
+                    Margin = new Thickness(6, 0, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = System.Windows.Media.Brushes.White
+                });
+                button.Background = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromArgb(210, 0, 48, 135));
+                button.BorderBrush = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromArgb(210, 80, 157, 230));
+                button.BorderThickness = new Thickness(1);
+                button.Content = content;
+            }
+            else
+            {
+                button.Content = mark;
+            }
+            button.SetValue(System.Windows.Automation.AutomationProperties.NameProperty,
+                name == "PayPal" ? "Donar por PayPal" : $"Abrir {name}");
 
             if (validUrl) button.Click += (_, _) => OpenSocialLink(url!);
             SocialButtons.Children.Add(button);
@@ -183,7 +220,7 @@ public partial class MainWindow : Window
         VolumePopupToggle.ToolTip = UiText.Get(language, "sound");
         MuteButton.Content = UiText.Get(language, "mute");
         UpdateAudioControls();
-        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.18";
+        var launcherVersion = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.19";
         LauncherBadge.Text = $"UBF  /  LAUNCHER  ·  V{launcherVersion}";
     }
 

@@ -1,6 +1,6 @@
 {
-  "version": "1.0.18",
+  "version": "1.0.19",
   "downloadUrl": "",
   "sha256": "",
-  "releaseNotes": "Corrige la animación de progreso y actualiza la versión objetivo del juego."
+  "releaseNotes": "Agrega un fondo de Launcher optimizado, reduce 40% el volumen máximo de la música y añade donaciones por PayPal."
 }

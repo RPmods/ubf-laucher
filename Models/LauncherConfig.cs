@@ -24,7 +24,8 @@ public sealed class LauncherConfig
     public string? InstalledGameVersion { get; set; }
     public Dictionary<string, string> SocialLinks { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Discord"] = "", ["YouTube"] = "", ["Twitch"] = "https://www.twitch.tv/rodrigorpmods", ["TikTok"] = "", ["Web"] = ""
+        ["Discord"] = "", ["YouTube"] = "", ["Twitch"] = "https://www.twitch.tv/rodrigorpmods",
+        ["TikTok"] = "", ["Web"] = "", ["PayPal"] = "https://www.paypal.com/paypalme/rodrigorpmods"
     };
 
     [JsonIgnore]

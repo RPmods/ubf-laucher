@@ -137,7 +137,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="UBF  /  LAUNCHER" Foreground="White" FontSize="10" FontWeight="Bold" />
-                    <TextBlock x:Name="LauncherBadge" Text="V1.0.18" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
+                    <TextBlock x:Name="LauncherBadge" Text="V1.0.19" Foreground="#FFB9C2C5" FontSize="9" Margin="0,2,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>

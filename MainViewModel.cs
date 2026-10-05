@@ -607,7 +607,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsProgressIndeterminate));
     }
 
-    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.18";
+    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.19";
 
     private enum RetryOperation { Verify, Install }
 

@@ -8,6 +8,7 @@ public sealed class AudioService : IDisposable
 {
     private static readonly TimeSpan FadeDuration = TimeSpan.FromSeconds(4);
     private static readonly TimeSpan FallbackTrackEnd = TimeSpan.FromMinutes(3) + TimeSpan.FromSeconds(31);
+    private const double MusicOutputGain = 0.60;
     private readonly MediaPlayer _player = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private readonly string[] _configuredTracks;
@@ -125,7 +126,7 @@ public sealed class AudioService : IDisposable
         var position = _player.Position;
         if (position >= _trackEnd) { OpenNextTrack(); return; }
         var fade = position <= _fadeStart ? 1d : Math.Clamp((_trackEnd - position).TotalMilliseconds / (_trackEnd - _fadeStart).TotalMilliseconds, 0, 1);
-        _player.Volume = IsMuted ? 0 : _volume * fade;
+        _player.Volume = IsMuted ? 0 : _volume * MusicOutputGain * fade;
     }
 
     private void OpenNextTrack()
@@ -148,7 +149,7 @@ public sealed class AudioService : IDisposable
         OpenNextTrack();
     }
 
-    private void ApplyCurrentVolume() => _player.Volume = IsMuted ? 0 : _volume;
+    private void ApplyCurrentVolume() => _player.Volume = IsMuted ? 0 : _volume * MusicOutputGain;
     private static string ResolveAsset(string path) => Path.IsPathRooted(path) ? path : Path.Combine(AppContext.BaseDirectory, path);
 
     public void Dispose()
