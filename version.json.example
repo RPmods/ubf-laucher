@@ -2,5 +2,5 @@
   "version": "1.0.19",
   "downloadUrl": "",
   "sha256": "",
-  "releaseNotes": "Agrega un fondo de Launcher optimizado, reduce 40% el volumen máximo de la música y añade donaciones por PayPal."
+  "releaseNotes": "Agrega donaciones por PayPal, actualiza el fondo, reduce 40% el volumen de la música y apunta a UBF v1.0.7-beta."
 }

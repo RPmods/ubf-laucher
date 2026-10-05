@@ -21,9 +21,9 @@ UBFLauncher
 Las secuencias son independientes. Actualizar UBFLauncher no cambia, reemplaza ni retira un juego. Eliminar una Release obsoleta del launcher nunca autoriza eliminar una Release del juego. No eliminar tags, commits ni fuentes necesarios para reconstruir versiones.
 
 Versiones públicas de referencia:
-- Juego UBF v1.0.6-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.6-beta.
-- UBFLauncher v1.0.18, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.18.
-- UBFLauncher v1.0.18 fija el objetivo del juego en UBF v1.0.6-beta; `version.json` apunta al ZIP publicado.
+- Juego UBF v1.0.7-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.7-beta.
+- UBFLauncher v1.0.19, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.19.
+- UBFLauncher v1.0.19 fija el objetivo del juego en UBF v1.0.7-beta; `version.json` apunta al ZIP publicado.
 
 2. PRESENTACIÓN, INTRO Y AUDIO DE UBF
 ------------------------------------
@@ -81,7 +81,7 @@ El script comprueba que el manifest y el ZIP coincidan con la build; publicar el
 
 1. Modificar el proyecto fuente en D:\proyectos\UBFLauncher y mantener el repositorio fuente en RPmods/ubf-laucher actualizado.
 2. Incrementar la versión propia del launcher y del updater en sus respectivos `.csproj` y `app.manifest`; actualizar badge/fallbacks de versión y `version.json.example`. Ambos ejecutables deben compartir el mismo número de versión. Mantener `version.json` con la versión pública actual hasta publicar el asset nuevo.
-3. Cambiar Settings.TargetGameVersion en launcher.settings.json y Models/LauncherConfig.cs solamente cuando haya una versión nueva del juego publicada y su manifest corresponda. No igualar ambas versiones por obligación. En esta revisión el launcher apunta al juego v1.0.6-beta.
+3. Cambiar Settings.TargetGameVersion en launcher.settings.json y Models/LauncherConfig.cs solamente cuando haya una versión nueva del juego publicada y su manifest corresponda. No igualar ambas versiones por obligación. En esta revisión el launcher apunta al juego v1.0.7-beta.
 4. Compilar y correr la suite existente:
 
    dotnet build .\UBFLauncher.slnx -c Release
@@ -121,3 +121,14 @@ UBFLauncher v1.0.17:
 - Release: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.18. El ZIP se cargó como `UBFLauncher-update.zip`; `version.json` en `main` se actualizó para esta URL y su SHA-256.
 - La build y las pruebas están verificadas. No se pudo inspeccionar la ventana ni probar JUGAR/VERIFICAR desde esta sesión porque el control de escritorio no expone aplicaciones de Windows; por tanto no afirmar que esas acciones se comprobaron visualmente.
 - La Release anterior del launcher se retira después de verificar la nueva Release y su asset. Se conservan su tag y fuente; no tocar Releases, ZIP ni tags del juego.
+
+7. PUBLICACIÓN v1.0.19
+-----------------------
+
+- Juego objetivo: UBF v1.0.7-beta. La Release del juego y su ZIP se publicaron por separado en RPmods/ubf; el manifest público se actualizó después de cargar el asset.
+- Cambios del launcher: botón visible DONAR enlazado a PayPal, nuevo fondo MP4, volumen de música con ganancia de salida al 60%, y mutex de instancia limitado a la ruta de instalación para no activar una copia antigua en otra carpeta.
+- `dotnet build .\UBFLauncher.slnx -c Release`: 0 advertencias y 0 errores. `dotnet test .\tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj -c Release`: 25/25 pruebas pasaron.
+- Tag `launcher-v1.0.19` apunta al código final de la versión. `publish.ps1` generó ProductVersion `1.0.19+489e42528ff64fda14e0d04c7d5ed5e72d336038`; ZIP de 171883515 bytes, SHA-256 `ea124d223a36cfc1d69ef4f0de3d4c5258e42b1b7b1c3ed563734d7da13dfe45`.
+- Release: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.19. Asset `UBFLauncher-update.zip` cargado; `version.json` de `main` apunta a su URL y SHA-256.
+- La ventana del ejecutable nuevo no se pudo verificar visualmente: la herramienta abrió/enfocó una copia antigua y no expuso la ventana del build. No afirmar una prueba visual interactiva de PayPal, JUGAR o VERIFICAR.
+- Tras verificar esta Release, retirar la Release anterior del launcher v1.0.18, conservando su tag y commits. Mantener intactas todas las Releases y los tags del juego.
