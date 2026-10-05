@@ -1,6 +1,6 @@
 {
-  "version": "1.0.21",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.21/UBFLauncher-update.zip",
-  "sha256": "4d05f648e2b1bb971982cc179359696a9380b2a9967f3da529974b1e239c69a6",
-  "releaseNotes": "Corrige la validación de rutas del actualizador y el traspaso de argumentos en instalaciones con espacios; apunta a UBF v1.0.7-beta."
+  "version": "1.0.22",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.22/UBFLauncher-update.zip",
+  "sha256": "034bb98416a7fb2280b8d3a36d8f701704d4b479ab1971a45f0e9c617a94dd11",
+  "releaseNotes": "Corrige la actualización del launcher y ajusta el tamaño y la posición del logo del juego."
 }
