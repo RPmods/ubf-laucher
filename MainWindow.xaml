@@ -33,9 +33,9 @@
                 </Rectangle.Fill>
             </Rectangle>
         </Grid>
-        <Grid x:Name="IdentityPanel" Width="458" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="55,0,0,0" IsHitTestVisible="False" Opacity="0" Panel.ZIndex="2">
+        <Grid x:Name="IdentityPanel" Width="390" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="38,84,0,0" IsHitTestVisible="False" Opacity="0" Panel.ZIndex="2">
             <Grid.RenderTransform><TranslateTransform x:Name="IdentityTransform" X="-28" /></Grid.RenderTransform>
-            <Image x:Name="HeroGameLogo" Source="" Width="430" Height="242" Stretch="Uniform" HorizontalAlignment="Left" Visibility="Collapsed" />
+            <Image x:Name="HeroGameLogo" Source="" Width="360" Height="203" Stretch="Uniform" HorizontalAlignment="Left" Visibility="Collapsed" />
         </Grid>
 
         <Grid x:Name="WindowChrome" Height="46" VerticalAlignment="Top" MouseLeftButtonDown="Chrome_MouseLeftButtonDown" Panel.ZIndex="5">
