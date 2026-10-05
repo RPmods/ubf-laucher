@@ -442,8 +442,18 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream));
                 if (!hash.Equals(remote.Sha256, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Launcher update package failed SHA-256 validation.");
             }
-            var args = $"--apply \"{archive}\" \"{AppContext.BaseDirectory}\" {Environment.ProcessId} \"{updateTemp}\"";
-            Process.Start(new ProcessStartInfo(updater, args) { UseShellExecute = true, WorkingDirectory = AppContext.BaseDirectory });
+            var updateProcess = new ProcessStartInfo(updater)
+            {
+                UseShellExecute = false,
+                WorkingDirectory = AppContext.BaseDirectory
+            };
+            updateProcess.ArgumentList.Add("--apply");
+            updateProcess.ArgumentList.Add(archive);
+            updateProcess.ArgumentList.Add(AppContext.BaseDirectory);
+            updateProcess.ArgumentList.Add(Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            updateProcess.ArgumentList.Add(updateTemp);
+            if (Process.Start(updateProcess) is null)
+                throw new InvalidOperationException("The launcher updater could not be started.");
             updateHandoffStarted = true;
             UpdateHandoffRequested?.Invoke(this, EventArgs.Empty);
         }
@@ -607,7 +617,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsProgressIndeterminate));
     }
 
-    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.19";
+    private static string GetCurrentLauncherVersion() => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "1.0.20";
 
     private enum RetryOperation { Verify, Install }
 

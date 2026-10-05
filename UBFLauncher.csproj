@@ -9,7 +9,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
-    <Version>1.0.19</Version>
+    <Version>1.0.20</Version>
     <AssemblyName>UBFLauncher</AssemblyName>
     <RootNamespace>UBFLauncher</RootNamespace>
     <PublishSingleFile>false</PublishSingleFile>
