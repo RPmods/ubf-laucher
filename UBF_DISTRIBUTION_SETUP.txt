@@ -143,4 +143,4 @@ UBFLauncher v1.0.17:
 - Asset `UBFLauncher-update.zip`: 171883376 bytes; SHA-256 `ff99a97221f7384e28cf2ef3b992d32a84aded7376670b2360843f8f867b232a`.
 - `version.json` en `main` apunta a la Release y publica el tamaño y el SHA-256 del ZIP para que las instalaciones existentes descarguen esta versión.
 - La inspección visual no se pudo completar: el control de Windows devolvió una lista vacía de aplicaciones/ventanas y rechazó el lanzamiento del ejecutable. No afirmar que se verificó la interfaz manualmente.
-- El juego UBF v1.0.8-beta se publica únicamente en `RPmods/ubf`; sus versiones no dependen del Launcher.
+- El juego UBF v1.0.8-beta se publica únicamente en `RPmods/ubf`; sus versiones no dependen del Launcher. Después de verificar v1.0.23 se retiraron las Releases obsoletas del launcher v1.0.21 y v1.0.22, conservando sus tags y commits. No se modificó ninguna Release del juego.
