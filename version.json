@@ -1,6 +1,6 @@
 {
-  "version": "1.0.17",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.17/UBFLauncher-update.zip",
-  "sha256": "855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48",
-  "releaseNotes": "Simplifica la identidad visual y deja el logo grande como único elemento principal del juego."
+  "version": "1.0.18",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.18/UBFLauncher-update.zip",
+  "sha256": "12de979b94488206c829c2b858d0621930c94777b3b9bb1198273f83882bc685",
+  "releaseNotes": "Actualiza el soporte para UBF v1.0.6-beta y conserva las correcciones de interfaz y progreso."
 }

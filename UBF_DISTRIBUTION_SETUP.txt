@@ -22,8 +22,8 @@ Las secuencias son independientes. Actualizar UBFLauncher no cambia, reemplaza n
 
 Versiones públicas de referencia:
 - Juego UBF v1.0.6-beta, Release https://github.com/RPmods/ubf/releases/tag/v1.0.6-beta.
-- UBFLauncher v1.0.17, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.17.
-- El código candidato a publicar como UBFLauncher v1.0.18 debe verificarse como se describe abajo; no afirmar que existe una Release antes de subir y comprobar su asset.
+- UBFLauncher v1.0.18, Release https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.18.
+- UBFLauncher v1.0.18 fija el objetivo del juego en UBF v1.0.6-beta; `version.json` apunta al ZIP publicado.
 
 2. PRESENTACIÓN, INTRO Y AUDIO DE UBF
 ------------------------------------
@@ -112,12 +112,12 @@ UBFLauncher v1.0.17:
 - ZIP publicado: `UBFLauncher-update.zip`, 350094539 bytes; SHA-256 `855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48`.
 - Después de verificar v1.0.17 se retira la Release del launcher v1.0.16. Sus tags y fuentes permanecen; las Releases y tags del juego siguen intactos.
 
-6. REVISIÓN DEL CANDIDATO v1.0.18
----------------------------------
+6. PUBLICACIÓN v1.0.18
+-----------------------
 
-- Cambios funcionales: reparación de la animación de progreso para evitar animar una transformación WPF congelada; nuevo test STA que carga el template real y comprueba que no haya excepciones del Dispatcher; limpieza de identidad visual solicitada; versión objetivo sincronizada con el juego v1.0.5-beta.
-- En el clon oficial, `dotnet build UBFLauncher.csproj --configuration Release --no-restore` terminó con 0 advertencias y 0 errores; las 25 pruebas de `UBFLauncher.Tests` pasaron. El test STA verifica que las posiciones de ambas bandas de progreso cambien y que el Dispatcher no registre excepciones.
-- El commit fuente que genera el candidato es `2269588`. `publish.ps1` produjo desde ese commit `publish/UBFLauncher-update.zip`: launcher y updater `ProductVersion` 1.0.18+2269588f21255eac9b2ff965de91ae600c2813b0, 350094399 bytes, SHA-256 `6aef3f13773a620a20faec2b1ecfcd2e48e9134ef36023a79fb9747d174698b1`. El ZIP contiene los ejecutables actuales, medios y manifest de archivos, y no incluye PDB.
-- El commit se debe subir y la Release sigue pendiente de validación interactiva. La comprobación automatizada de arranque anterior llegó al registro de intro de logo, menú, música y consulta del manifest sin registrar una excepción nueva. No se comprobó visualmente la ventana ni se hizo clic en JUGAR/VERIFICAR; por eso el ZIP sigue siendo un candidato local y `version.json` conserva los datos de la Release pública v1.0.17.
-- No marcar la prueba interactiva como realizada mientras no se abra el ejecutable generado y se verifique su flujo. Solo después de la prueba básica puede publicarse v1.0.18 y retirarse el release anterior del launcher.
-- No tocar las Releases, los ZIP ni los tags del juego al limpiar releases del launcher.
+- Cambios: reparación de la animación de progreso WPF, test STA para movimiento de las bandas y excepciones del Dispatcher, y configuración del juego objetivo UBF v1.0.6-beta.
+- `dotnet build .\UBFLauncher.slnx -c Release` terminó con 0 advertencias y 0 errores; las 25 pruebas de `UBFLauncher.Tests` pasaron.
+- El commit de código `15018a4906feae7352b9b9f9c97dab6f96b02410` recibió el tag `launcher-v1.0.18`. `publish.ps1` generó desde esa revisión `publish/UBFLauncher-update.zip`, con ProductVersion `1.0.18+15018a4906feae7352b9b9f9c97dab6f96b02410`, tamaño 350094392 bytes y SHA-256 `12de979b94488206c829c2b858d0621930c94777b3b9bb1198273f83882bc685`.
+- Release: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.18. El ZIP se cargó como `UBFLauncher-update.zip`; `version.json` en `main` se actualizó para esta URL y su SHA-256.
+- La build y las pruebas están verificadas. No se pudo inspeccionar la ventana ni probar JUGAR/VERIFICAR desde esta sesión porque el control de escritorio no expone aplicaciones de Windows; por tanto no afirmar que esas acciones se comprobaron visualmente.
+- La Release anterior del launcher se retira después de verificar la nueva Release y su asset. Se conservan su tag y fuente; no tocar Releases, ZIP ni tags del juego.

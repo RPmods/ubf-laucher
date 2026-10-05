@@ -12,7 +12,7 @@ Guía de build, validación y publicación: [UBF_DISTRIBUTION_SETUP.txt](UBF_DIS
 
 ## UBFLauncher
 
-La Release pública del launcher es v1.0.17; el código candidato v1.0.18 apunta al juego UBF v1.0.6-beta. Los números no se sincronizan: publicar una actualización del launcher no crea, reemplaza ni retira una Release del juego. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
+La Release pública del launcher es v1.0.18 y apunta al juego UBF v1.0.6-beta. Los números no se sincronizan: publicar una actualización del launcher no crea, reemplaza ni retira una Release del juego. El ZIP del launcher y su `version.json` pertenecen a `RPmods/ubf-laucher`; el ZIP del juego y `manifest.json` pertenecen a `RPmods/ubf`.
 
 JUGAR inicia `UBF/Binaries/Win64/UBF-Win64-Shipping.exe`, cambia a `INICIANDO...` y bloquea clics repetidos. El audio del launcher se pausa mientras UBF está abierto.
 
@@ -34,5 +34,5 @@ Usa Git LFS para recursos de video grandes. No subas salidas generadas ni creden
 ## Releases actuales
 
 - Juego UBF v1.0.6-beta: https://github.com/RPmods/ubf/releases/tag/v1.0.6-beta. Consulta la Release para obtener el ZIP y su metadata vigentes.
-- UBFLauncher v1.0.17: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.17. ZIP `UBFLauncher-update.zip`, 350094539 bytes, SHA-256 `855cb58355d9040cf88f6785508ce5f5627f6eeb001d6ef285b00c1b02c12a48`.
-- Cuando v1.0.18 se compile, se pruebe y se publique, retirar únicamente la Release obsoleta del launcher que la precede; conservar sus tags y fuentes, y todas las Releases del juego.
+- UBFLauncher v1.0.18: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.18. ZIP `UBFLauncher-update.zip`, 350094392 bytes, SHA-256 `12de979b94488206c829c2b858d0621930c94777b3b9bb1198273f83882bc685`.
+- La compilación y 25 pruebas automatizadas pasaron. La inspección visual de esta build no se pudo hacer porque el control de escritorio de esta sesión no expone ventanas de Windows.
