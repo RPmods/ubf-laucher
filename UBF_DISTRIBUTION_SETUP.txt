@@ -138,6 +138,9 @@ UBFLauncher v1.0.17:
 -------------------------------------
 
 - Cambio funcional: se eliminó la versión fija del juego en el launcher. Ahora lee el número de versión desde `manifest.json`, de modo que una actualización de UBF no requiere por sí sola otra versión del launcher.
-- Se compilaron el launcher y el updater self-contained para Windows x64, se validaron sus versiones y recursos, y se ejecutó la suite automatizada.
-- Artefacto: `UBFLauncher-update.zip`; el tamaño, SHA-256, tag y URL públicos se registran aquí después de verificar la Release.
-- El juego UBF v1.0.8-beta se publica exclusivamente en `RPmods/ubf`; no sustituye ni elimina releases anteriores del juego.
+- `dotnet test .\tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj -c Release`: 26/26 pruebas pasaron. `publish.ps1` compiló el launcher y el updater self-contained para Windows x64 desde el commit `37568fae3e421269ae70912ab1b5f68155a1f804`.
+- Tag: `launcher-v1.0.23`. Release: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.23.
+- Asset `UBFLauncher-update.zip`: 171883376 bytes; SHA-256 `ff99a97221f7384e28cf2ef3b992d32a84aded7376670b2360843f8f867b232a`.
+- `version.json` en `main` apunta a la Release y publica el tamaño y el SHA-256 del ZIP para que las instalaciones existentes descarguen esta versión.
+- La inspección visual no se pudo completar: el control de Windows devolvió una lista vacía de aplicaciones/ventanas y rechazó el lanzamiento del ejecutable. No afirmar que se verificó la interfaz manualmente.
+- El juego UBF v1.0.8-beta se publica únicamente en `RPmods/ubf`; sus versiones no dependen del Launcher.

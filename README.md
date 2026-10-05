@@ -35,4 +35,4 @@ Usa Git LFS para recursos de video grandes. No subas salidas generadas ni creden
 
 - Juego UBF: la versión y el paquete disponibles se consultan en https://github.com/RPmods/ubf/releases y en `manifest.json`.
 - UBFLauncher v1.0.23: https://github.com/RPmods/ubf-laucher/releases/tag/launcher-v1.0.23. ZIP `UBFLauncher-update.zip`; `version.json` publica su tamaño y SHA-256.
-- La compilación y las 25 pruebas automatizadas pasaron. La prueba visual no pudo completarse: el control del escritorio enfocó la instalación antigua y no expuso la ventana del build publicado.
+- `dotnet test .\tests\UBFLauncher.Tests\UBFLauncher.Tests.csproj -c Release`: 26/26 pruebas pasaron. `publish.ps1` generó v1.0.23 desde el commit `37568fa`; el ZIP tiene 171883376 bytes y SHA-256 `ff99a97221f7384e28cf2ef3b992d32a84aded7376670b2360843f8f867b232a`. No se completó la inspección visual: el control de Windows no expuso ventanas de aplicaciones ni permitió lanzar el ejecutable.
