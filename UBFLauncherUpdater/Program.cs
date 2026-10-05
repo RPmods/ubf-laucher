@@ -130,8 +130,9 @@ internal static class Program
     {
         if (Path.IsPathRooted(relative) || relative.Replace('\\', '/').Split('/').Any(part => part is ".." or "." || part.Contains(':')))
             throw new InvalidDataException("Update archive contains an unsafe path.");
-        var fullRoot = Path.GetFullPath(root) + Path.DirectorySeparatorChar;
-        var full = Path.GetFullPath(Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar)));
+        var fullRoot = Path.GetFullPath(root);
+        if (!Path.EndsInDirectorySeparator(fullRoot)) fullRoot += Path.DirectorySeparatorChar;
+        var full = Path.GetFullPath(Path.Combine(fullRoot, relative.Replace('/', Path.DirectorySeparatorChar)));
         if (!full.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Update archive path escapes its target directory.");
         return full;
     }
