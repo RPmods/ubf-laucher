@@ -1,6 +1,6 @@
 {
-  "version": "1.0.19",
-  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.19/UBFLauncher-update.zip",
-  "sha256": "ea124d223a36cfc1d69ef4f0de3d4c5258e42b1b7b1c3ed563734d7da13dfe45",
-  "releaseNotes": "Agrega donaciones por PayPal, actualiza el fondo, reduce 40% el volumen de la música y apunta a UBF v1.0.7-beta."
+  "version": "1.0.20",
+  "downloadUrl": "https://github.com/RPmods/ubf-laucher/releases/download/launcher-v1.0.20/UBFLauncher-update.zip",
+  "sha256": "db656ca0add9cfad483eb28e9a358278073011a8575e3ee1b3fc60c591781d07",
+  "releaseNotes": "Corrige los argumentos del actualizador en instalaciones de Windows con espacios en la ruta y apunta a UBF v1.0.7-beta."
 }
